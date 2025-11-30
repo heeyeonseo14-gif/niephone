@@ -361,16 +361,55 @@ async function sendMsg() {
         let data = await res.json();
         console.log("AI 返回：", data);
 
-        // --- 兼容不同返回格式 ---
-        let reply =
-            data.choices?.[0]?.message?.content ||
-            data.choices?.[0]?.text ||
-            data.output_text ||
-            data.reply ||
-            "（AI 无回复）";
+// --- 兼容不同返回格式 ---
+let reply =
+    data.choices?.[0]?.message?.content ||
+    data.choices?.[0]?.text ||
+    data.output_text ||
+    data.reply ||
+    "(AI 无回复)";
 
-        aiBubble.innerText = reply;
+// --- AI 多条回复（最多 20 条） ---
+function splitReply(text) {
+    let parts = text.split(/(?<=[。！？!?]|[\n])/);
+    parts = parts.map(p => p.trim()).filter(p => p.length > 0);
+
+    if (parts.length > 20) {
+        let size = Math.ceil(parts.length / 20);
+        let merged = [];
+        for (let i = 0; i < parts.length; i += size) {
+            merged.push(parts.slice(i, i + size).join(""));
+        }
+        return merged.slice(0, 20);
+    }
+    return parts;
+}
+
+let replies = splitReply(reply);
+
+// 删除“AI 正在思考...”泡泡
+aiBubble.remove();
+
+// 逐条显示 AI 回复
+replies.forEach((msg, index) => {
+    setTimeout(() => {
+        let rowAi = document.createElement("div");
+        rowAi.className = "msg-row";
+
+        let imgAi = document.createElement("img");
+        imgAi.className = "avatar-ai";
+        imgAi.src = avatarAi || "https://i.imgur.com/3GvwNBf.png";
+
+        let bubble = document.createElement("div");
+        bubble.className = "msg ai";
+        bubble.innerText = msg;
+
+        rowAi.appendChild(imgAi);
+        rowAi.appendChild(bubble);
+        chat.appendChild(rowAi);
         chat.scrollTop = chat.scrollHeight;
+    }, index * 500);
+});
 
     } catch (err) {
         aiBubble.innerText = "⚠ AI 调用失败，请检查 API。";
