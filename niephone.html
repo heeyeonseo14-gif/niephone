@@ -149,6 +149,43 @@ body {
     border-radius:12px;
     border:1px solid #ccc;
     font-size:15px;
+    /* 聊天背景支持壁纸 */
+.chat-box {
+    background-size: cover;
+    background-position: center;
+}
+
+/* 气泡加头像布局容器 */
+.msg-row {
+    display: flex;
+    align-items: flex-end;
+    margin: 10px 0;
+}
+
+/* 左侧 AI 头像 */
+.avatar-ai {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+}
+
+/* 右侧用户头像 */
+.avatar-me {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    margin-left: 8px;
+    object-fit: cover;
+}
+
+.msg.me {
+    margin-left: 0;
+}
+
+.msg.ai {
+    margin-right: 0;
 }
 </style>
 </head>
