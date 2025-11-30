@@ -6,7 +6,8 @@
 <style>
 body { margin:0; background:#f5f5f5; font-family:Arial,sans-serif;}
 .phone { width:380px; height:700px; background:white; margin:20px auto; border-radius:25px; box-shadow:0 0 20px rgba(0,0,0,0.2); display:flex; flex-direction:column; overflow:hidden;}
-.header {background:#07c160; padding:12px; color:white; text-align:center; font-size:20px;}
+.header {background:#07c160; padding:12px; color:white; text-align:center; font-size:20px; position:relative;}
+.settings-btn { position:absolute; right:15px; top:10px; background:white; color:#07c160; font-size:14px; padding:3px 8px; border-radius:10px; cursor:pointer; border:none; }
 .chat-box {flex:1; padding:10px; overflow-y:auto;}
 .msg {max-width:70%; padding:10px 14px; border-radius:10px; margin:8px 0; line-height:1.4;}
 .me {background:#95ec69; margin-left:auto;}
@@ -14,20 +15,48 @@ body { margin:0; background:#f5f5f5; font-family:Arial,sans-serif;}
 .input-area {display:flex; padding:10px; border-top:1px solid #ddd;}
 input {flex:1; padding:10px; border-radius:20px; border:1px solid #ccc; outline:none;}
 button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; background:#07c160; color:white; cursor:pointer;}
-.api-container {padding:10px; background:#fff; display:flex; align-items:center; gap:10px; border-bottom:1px solid #ddd;}
-.api-container input {flex:1;}
+
+/* 设置面板 */
+.settings-panel {
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.5);
+    display:none; justify-content:center; align-items:center;
+}
+.panel-box {
+    background:white;
+    width:80%;
+    padding:20px;
+    border-radius:15px;
+}
+.panel-box input {
+    width:100%; margin:10px 0;
+    padding:10px; border-radius:10px; border:1px solid #ccc;
+}
 </style>
 </head>
 
 <body>
 <div class="phone">
-    <div class="header">niephone</div>
 
-    <div class="api-container">
-        <input id="apiInput" type="text" placeholder="在这里输入你的 OpenAI API Key" />
-        <button onclick="setApiKey()">确认</button>
+    <!-- 顶部 -->
+    <div class="header">
+        niephone
+        <button class="settings-btn" onclick="openSettings()">⚙ 设置</button>
     </div>
 
+    <!-- 设置面板 -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="panel-box">
+            <h3>API 设置</h3>
+            <input id="apiUrl" placeholder="API 网站 URL，例如：https://api.openai.com/v1/responses">
+            <input id="apiKey" placeholder="API Key（sk-开头）">
+            <button onclick="saveSettings()">保存</button>
+            <button style="margin-left:10px;background:#ccc;color:black;" onclick="closeSettings()">取消</button>
+        </div>
+    </div>
+
+    <!-- 聊天区 -->
     <div class="chat-box" id="chat"></div>
 
     <div class="input-area">
@@ -37,22 +66,42 @@ button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; ba
 </div>
 
 <script>
-let apiKey = "";
+let apiKey = localStorage.getItem("nie_api_key") || "";
+let apiUrl = localStorage.getItem("nie_api_url") || "";
 
-function setApiKey() {
-    let input = document.getElementById("apiInput");
-    apiKey = input.value.trim();
-    if(apiKey){
-        alert("API Key 设置成功！现在可以开始聊天了。");
-        input.disabled = true;
-    } else {
-        alert("请输入有效的 API Key！");
-    }
+// 打开设置
+function openSettings() {
+    document.getElementById("settingsPanel").style.display = "flex";
+    document.getElementById("apiKey").value = apiKey;
+    document.getElementById("apiUrl").value = apiUrl;
 }
 
+// 关闭设置
+function closeSettings() {
+    document.getElementById("settingsPanel").style.display = "none";
+}
+
+// 保存设置
+function saveSettings() {
+    apiKey = document.getElementById("apiKey").value.trim();
+    apiUrl = document.getElementById("apiUrl").value.trim();
+
+    if(!apiKey || !apiUrl){
+        alert("请填写 API URL 和 API Key！");
+        return;
+    }
+
+    localStorage.setItem("nie_api_key", apiKey);
+    localStorage.setItem("nie_api_url", apiUrl);
+
+    alert("保存成功！");
+    closeSettings();
+}
+
+// 发送消息
 async function sendMsg() {
-    if(!apiKey){
-        alert("请先输入你的 API Key！");
+    if(!apiKey || !apiUrl){
+        alert("请先进入设置填写 API 信息！");
         return;
     }
 
@@ -76,7 +125,7 @@ async function sendMsg() {
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        let response = await fetch("https://api.openai.com/v1/chat/completions", {
+        let response = await fetch(apiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -85,7 +134,6 @@ async function sendMsg() {
             body: JSON.stringify({
                 model: "gpt-4o-mini",
                 messages: [
-                    { role: "system", content: "你是一个温柔可爱的AI小手机助手。" },
                     { role: "user", content: text }
                 ]
             })
