@@ -179,19 +179,26 @@ async function sendMsg() {
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        let response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + apiKey
-            },
-            body: JSON.stringify({
-                model: modelName,
-                messages: [
-                    { role: "user", content: text }
-                ]
-            })
-        });
+        // 自动拼接 chat 接口
+let chatUrl = apiUrl;
+
+// 如果用户只填了基础路径，例如 https://api521.pro/v1
+if (!apiUrl.endsWith("/responses") && !apiUrl.endsWith("/chat/completions")) {
+    // 默认自动使用 responses（API521 最常用）
+    chatUrl = apiUrl.replace(/\/$/, "") + "/responses";
+}
+
+const response = await fetch(chatUrl, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+        model: modelName,
+        input: text   // API521 的 responses 需要 input 字段
+    })
+});
 
         let data = await response.json();
 
