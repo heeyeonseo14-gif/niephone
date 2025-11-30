@@ -6,121 +6,111 @@
 
 <style>
 body {
-    margin:0;
-    background:#e9eef3;
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-    display:flex;
-    justify-content:center;
-    padding-top:25px;
+    margin: 0;
+    background: #f5f5f5;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
 }
 
-/* 手机壳 */
 .phone {
-    width:390px;
-    height:780px;
-    background:white;
-    border-radius:32px;
-    box-shadow:0 10px 35px rgba(0,0,0,0.15);
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    position:relative;
+    width: 380px;
+    height: 700px;
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* 顶部状态栏 */
-.status-bar {
-    height:20px;
-    background:white;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 12px;
-    font-size:12px;
-    color:#555;
-}
-
-/* 顶部标题栏 */
 .header {
-    background:#07c160;
-    padding:14px;
-    font-size:22px;
-    color:white;
-    position:relative;
-    text-align:center;
-    letter-spacing:1px;
+    background: #07c160;
+    padding: 12px;
+    font-size: 20px;
+    color: white;
+    position: relative;
+    text-align: center;
 }
 
 .settings-btn {
-    position:absolute;
-    right:16px;
-    top:14px;
-    color:white;
-    background:none;
-    border:none;
-    font-size:20px;
+    position: absolute;
+    right: 15px;
+    top: 12px;
+    color: white;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
 }
 
-/* 聊天框 */
 .chat-box {
-    flex:1;
-    padding:14px;
-    overflow-y:auto;
-    background:#f6f6f6;
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-size: cover;
+    background-position: center;
 }
 
-/* 气泡基础 */
+.msg-row {
+    display: flex;
+    align-items: flex-end;
+    margin: 10px 0;
+}
+
 .msg {
-    max-width:75%;
-    padding:12px 16px;
-    border-radius:16px;
-    margin:10px 0;
-    word-break:break-word;
-    font-size:16px;
-    line-height:1.5;
-    box-shadow:0px 2px 6px rgba(0,0,0,0.1);
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin: 5px;
+    word-break: break-word;
 }
 
-/* 我的消息 */
-.msg.me {
-    background:#9fe8a9;
-    margin-left:auto;
-    border-bottom-right-radius:4px;
+.me {
+    background: #95ec69;
+    margin-left: auto;
 }
 
-/* AI 消息 */
-.msg.ai {
-    background:white;
-    margin-right:auto;
-    border-bottom-left-radius:4px;
+.ai {
+    background: #e5e5e5;
+    margin-right: auto;
 }
 
-/* 输入区域 */
+/* 头像 */
+.avatar-ai,
+.avatar-me {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-ai { margin-right: 8px; }
+.avatar-me { margin-left: 8px; }
+
+/* 输入区 */
 .input-area {
-    display:flex;
-    padding:12px;
-    background:white;
-    border-top:1px solid #ddd;
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
 }
 
-#msgInput {
-    flex:1;
-    padding:12px 15px;
-    border-radius:25px;
-    border:1px solid #ccc;
-    font-size:16px;
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
 }
 
-/* 发送按钮 */
-.send-btn {
-    margin-left:10px;
-    width:48px;
-    height:48px;
-    border-radius:24px;
-    border:none;
-    background:#07c160;
-    color:white;
-    font-size:18px;
-    font-weight:bold;
+button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    border: none;
+    background: #07c160;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 /* 设置面板 */
@@ -128,74 +118,32 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.5);
-    display: none;           /* 默认隐藏 */
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 1000;           /* 确保在最上层显示时在顶层 */
-    pointer-events: auto;    /* 允许点击（隐藏时 display:none 就不会拦截） */
+    z-index: 999;
 }
 
 .panel-box {
-    background:white;
-    width:78%;
-    padding:22px;
-    border-radius:18px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.2);
+    background: white;
+    width: 80%;
+    padding: 20px;
+    border-radius: 15px;
 }
 
-.panel-box input, .panel-box select {
-    width:100%;
-    margin:12px 0;
-    padding:12px;
-    border-radius:12px;
-    border:1px solid #ccc;
-    font-size:15px;
-}
-    
-/* 聊天背景支持壁纸 */
-.chat-box {
-    background-size: cover;
-    background-position: center;
-}
-
-/* 气泡加头像布局容器 */
-.msg-row {
-    display: flex;
-    align-items: flex-end;
+.panel-box input,
+.panel-box select {
+    width: 100%;
     margin: 10px 0;
-}
-
-/* 左侧 AI 头像 */
-.avatar-ai {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    margin-right: 8px;
-    object-fit: cover;
-}
-
-/* 右侧用户头像 */
-.avatar-me {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    margin-left: 8px;
-    object-fit: cover;
-}
-
-.msg.me {
-    margin-left: 0;
-}
-
-.msg.ai {
-    margin-right: 0;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
 }
 </style>
 </head>
 
 <body>
-    <div class="phone">
-
+<div class="phone">
     <div class="header">
         niephone
         <button class="settings-btn" onclick="openSettings()">⚙</button>
@@ -204,29 +152,36 @@ body {
     <!-- 设置面板 -->
     <div class="settings-panel" id="settingsPanel">
         <div class="panel-box">
-            <h3 style="margin-top:0;">API 设置</h3>
+            <h3>API 设置</h3>
 
-            <input id="apiUrl" placeholder="API 地址，如 https://api521.pro/v1" />
-            <input id="apiKey" placeholder="API Key" />
+            <label>API 地址：</label>
+            <input id="apiUrl" placeholder="例如：https://api.openai.com/v1" />
+
+            <label>API Key：</label>
+            <input id="apiKey" placeholder="你的 API Key" />
 
             <label>选择模型：</label>
             <select id="modelSelect">
-                <option>加载中…</option>
+                <option>请填写 API 后加载</option>
             </select>
-<label>更换聊天背景（壁纸）</label>
-<input type="file" accept="image/*" onchange="setWallpaper(event)" />
 
-<label>用户头像：</label>
-<input type="file" accept="image/*" onchange="setAvatarMe(event)" />
+            <hr>
 
-<label>AI 头像：</label>
-<input type="file" accept="image/*" onchange="setAvatarAi(event)" />
-            <button onclick="saveSettings()" style="width:100%;background:#4CC38A;color:white;padding:12px;border-radius:14px;border:none;">
-                保存
-            </button>
-            <button onclick="closeSettings()" style="width:100%;margin-top:10px;background:#ccc;color:white;padding:12px;border-radius:14px;border:none;">
-                关闭
-            </button>
+            <h3>外观设置</h3>
+
+            <label>更换聊天背景（壁纸）</label>
+            <input type="file" accept="image/*" onchange="setWallpaper(event)" />
+
+            <label>用户头像（我）</label>
+            <input type="file" accept="image/*" onchange="setAvatarMe(event)" />
+
+            <label>AI 头像</label>
+            <input type="file" accept="image/*" onchange="setAvatarAi(event)" />
+
+            <br>
+
+            <button onclick="saveSettings()">保存</button>
+            <button style="margin-left:10px;background:#999;" onclick="closeSettings()">关闭</button>
         </div>
     </div>
 
@@ -236,197 +191,93 @@ body {
     <!-- 输入区 -->
     <div class="input-area">
         <input id="msgInput" placeholder="输入消息…" />
-        <button class="send-btn" onclick="sendMsg()">发送</button>
+        <button onclick="sendMsg()">发送</button>
     </div>
 
-    </div>
+</div> <!-- phone 结束 -->
+
 <script>
+    // 从 localStorage 读取已保存内容
 let apiKey = localStorage.getItem("nie_api_key") || "";
 let apiUrl = localStorage.getItem("nie_api_url") || "";
 let modelName = localStorage.getItem("nie_model") || "";
-    // 打开设置面板
+let wallpaper = localStorage.getItem("nie_wallpaper") || "";
+let avatarMe = localStorage.getItem("nie_avatar_me") || "";
+let avatarAi = localStorage.getItem("nie_avatar_ai") || "";
+
+// 页面加载后应用壁纸
+window.onload = function() {
+    if (wallpaper) {
+        let chat = document.getElementById("chat");
+        chat.style.backgroundImage = `url(${wallpaper})`;
+    }
+};
+
+// 打开设置面板
 function openSettings() {
-  document.getElementById("settingsPanel").style.display = "flex";
-  document.getElementById("apiKey").value = apiKey || "";
-  // 如果你想强制显示固定的基础地址（只呈现 https://api521.pro/v1），可以把下一行改为固定值：
-  // document.getElementById("apiUrl").value = "https://api521.pro/v1";
-  document.getElementById("apiUrl").value = apiUrl || "";
-  // 如果之前有保存的模型名则设置下拉选中（可能为空）
-  if (modelName) {
-    // 等待 loadModels 完成会自动选中
-  }
-  // 如果填写了 API 信息，自动拉取模型列表
-  if (apiKey && apiUrl) {
-    loadModels();
-  }
+    document.getElementById("settingsPanel").style.display = "flex";
+
+    document.getElementById("apiKey").value = apiKey;
+    document.getElementById("apiUrl").value = apiUrl;
+
+    if (apiKey && apiUrl) loadModels();
 }
 
-// 关闭设置面板
+// 关闭设置
 function closeSettings() {
-  document.getElementById("settingsPanel").style.display = "none";
+    document.getElementById("settingsPanel").style.display = "none";
 }
 
-// 保存设置（写 localStorage）
+// 保存 API 信息
 function saveSettings() {
-  let inKey = document.getElementById("apiKey").value.trim();
-  let inUrl = document.getElementById("apiUrl").value.trim();
-  let sel = document.getElementById("modelSelect");
-  let inModel = sel ? (sel.value || "") : "";
+    apiKey = document.getElementById("apiKey").value.trim();
+    apiUrl = document.getElementById("apiUrl").value.trim();
+    let sel = document.getElementById("modelSelect");
+    modelName = sel.value;
 
-  // 如果你强制想要 apiUrl 一直是 https://api521.pro/v1，可以在这里覆盖：
-  // inUrl = "https://api521.pro/v1";
-
-  if (!inKey || !inUrl) {
-    alert("请填写 API URL 和 API Key");
-    return;
-  }
-
-  apiKey = inKey;
-  apiUrl = inUrl;
-  modelName = inModel;
-
-  localStorage.setItem("nie_api_key", apiKey);
-  localStorage.setItem("nie_api_url", apiUrl);
-  localStorage.setItem("nie_model", modelName);
-
-  alert("保存成功！");
-  closeSettings();
-  // 保存后尝试加载模型（如果需要）
-  if (apiKey && apiUrl) loadModels();
-}
-
-// 从 API 加载模型列表（兼容多种返回格式）
-async function loadModels() {
-  let modelSelect = document.getElementById("modelSelect");
-  if (!modelSelect) return;
-  modelSelect.innerHTML = "<option>加载中…</option>";
-
-  try {
-    // 将用户输入的基础地址拼接成 /v1/models（兼容用户填 /v1 或 /v1/ 或直接 /models）
-    let modelsUrl = apiUrl || "";
-    // 强制去掉末尾斜杠
-    modelsUrl = modelsUrl.replace(/\/+$/, "");
-    // 如果用户直接输入了 /models 或 /v1/models 就不重复添加
-    if (!modelsUrl.endsWith("/models")) {
-      // 如果用户只填了 /v1，则加 /models；如果填的是根域名也加 /v1/models 视情况而定
-      // 这里用比较保守的策略：优先尝试 /models（适配很多代理），如果接口要求 /v1/models，请把 apiUrl 改为包含 /v1
-      modelsUrl = modelsUrl + "/models";
-    }
-
-    const res = await fetch(modelsUrl, {
-      headers: {
-        "Authorization": `Bearer ${apiKey}`
-      }
-    });
-    const data = await res.json();
-
-    // 清空
-    modelSelect.innerHTML = "";
-
-    // 兼容不同格式：data.data / data.models / data.model / data
-    let list = data.data || data.models || data.model || data;
-
-    // 如果返回是对象且里面有 models 字段再取一次
-    if (!Array.isArray(list) && typeof list === "object") {
-      // 可能像 {models: [...]}
-      list = list.models || list.list || Object.values(list);
-    }
-
-    if (!Array.isArray(list) || list.length === 0) {
-      // 没拿到列表，尝试用另一种常见字段（兼容某些代理）
-      modelSelect.innerHTML = "<option>无法读取模型列表</option>";
-      return;
-    }
-
-    list.forEach(m => {
-      // 有些返回项直接是字符串，有些是对象
-      let name = "";
-      if (typeof m === "string") name = m;
-      else name = m.id || m.model || m.name || (m.modelId || "");
-      if (name) {
-        let op = document.createElement("option");
-        op.value = name;
-        op.textContent = name;
-        modelSelect.appendChild(op);
-      }
-    });
-
-    // 如果之前保存过 modelName，试着选中
-    if (modelName) {
-      try { modelSelect.value = modelName; } catch(e) {}
-    }
-  } catch (err) {
-    modelSelect.innerHTML = "<option>加载模型失败</option>";
-    console.error("loadModels error:", err);
-  }
-}
-    // 发送消息到 API（新版，支持 /v1/chat/completions）
-async function sendMsg() {
-    let text = document.getElementById("msgInput").value.trim();
-    if (!text) return;
-
-    let chat = document.getElementById("chat");
-
-    // 显示自己的消息
-    let userMsg = document.createElement("div");
-    userMsg.className = "msg me";
-    userMsg.innerText = text;
-    chat.appendChild(userMsg);
-
-    document.getElementById("msgInput").value = "";
-    chat.scrollTop = chat.scrollHeight;
-
-    // 检查 API 配置
-    if (!apiKey || !apiUrl || !modelName) {
-        let warn = document.createElement("div");
-        warn.className = "msg ai";
-        warn.innerText = "请先进入设置填写 API URL、API Key 和模型。";
-        chat.appendChild(warn);
-        chat.scrollTop = chat.scrollHeight;
+    if (!apiKey || !apiUrl) {
+        alert("API 地址与 Key 不能为空！");
         return;
     }
 
-    // AI 正在思考…
-    let aiMsg = document.createElement("div");
-    aiMsg.className = "msg ai";
-    aiMsg.innerText = "正在思考…";
-    chat.appendChild(aiMsg);
-    chat.scrollTop = chat.scrollHeight;
+    localStorage.setItem("nie_api_key", apiKey);
+    localStorage.setItem("nie_api_url", apiUrl);
+    localStorage.setItem("nie_model", modelName);
+
+    alert("保存成功！");
+    closeSettings();
+}
+
+// 读取模型列表
+async function loadModels() {
+    let modelSelect = document.getElementById("modelSelect");
+    modelSelect.innerHTML = "<option>加载中...</option>";
 
     try {
-        // 自动补全聊天接口（API521 标准：/v1/chat/completions）
-        let chatUrl = apiUrl.replace(/\/+$/, ""); // 去掉末尾 /
-        if (!chatUrl.endsWith("/chat/completions")) {
-            chatUrl += "/chat/completions";
-        }
-
-        const res = await fetch(chatUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: modelName,
-                messages: [
-                    { role: "user", content: text }
-                ]
-            })
+        let url = apiUrl.replace(/\/$/, "") + "/models";
+        let res = await fetch(url, {
+            headers: { "Authorization": `Bearer ${apiKey}` }
         });
 
-        const data = await res.json();
-        console.log("AI 返回：", data);
+        let data = await res.json();
 
-        let reply = "";
+        modelSelect.innerHTML = "";
+        let models = data.data || data.models || [];
 
-        // 兼容各种返回格式 ↓↓↓
-        if (data.choices && data.choices[0]?.message?.content) {
-            reply = data.choices[0].message.content;
-        }
-        else if (data.output_text) {
-            reply = data.output_text;
-        }
-        else if (data.reply) {
+        models.forEach(m => {
+            let op = document.createElement("option");
+            op.value = m.id || m.name;
+            op.textContent = m.id || m.name;
+            modelSelect.appendChild(op);
+        });
+
+        if (modelName) modelSelect.value = modelName;
+
+    } catch (err) {
+        modelSelect.innerHTML = "<option>加载模型失败</option>";
+        console.error(err);
+    }
+}
 // 发送消息到 API
 async function sendMsg() {
     let text = document.getElementById("msgInput").value.trim();
@@ -434,30 +285,27 @@ async function sendMsg() {
 
     let chat = document.getElementById("chat");
 
-    // 读取用户头像（如果无，使用默认）
-    let avatarMe = localStorage.getItem("nie_avatar_me") || "";
-
-    // 显示用户消息 + 头像
+    // 显示自己的消息（带头像）
     let rowMe = document.createElement("div");
     rowMe.className = "msg-row";
-    rowMe.style.justifyContent = "flex-end";
 
-    let meBubble = document.createElement("div");
-    meBubble.className = "msg me";
-    meBubble.innerText = text;
+    let bubbleMe = document.createElement("div");
+    bubbleMe.className = "msg me";
+    bubbleMe.innerText = text;
 
     let imgMe = document.createElement("img");
     imgMe.className = "avatar-me";
-    imgMe.src = avatarMe || "https://i.imgur.com/WxZS2sO.png";
+    imgMe.src = avatarMe || "";
 
-    rowMe.appendChild(meBubble);
+    // 右侧排列：消息在左，头像在右
+    rowMe.appendChild(bubbleMe);
     rowMe.appendChild(imgMe);
     chat.appendChild(rowMe);
 
     document.getElementById("msgInput").value = "";
     chat.scrollTop = chat.scrollHeight;
 
-    // 没有配置 API
+    // 检查 API 设置
     if (!apiKey || !apiUrl || !modelName) {
         let warn = document.createElement("div");
         warn.className = "msg ai";
@@ -466,31 +314,28 @@ async function sendMsg() {
         return;
     }
 
-    // AI 正在思考提示
+    // AI 思考中提示
     let rowAi = document.createElement("div");
     rowAi.className = "msg-row";
 
     let imgAi = document.createElement("img");
     imgAi.className = "avatar-ai";
-    imgAi.src = localStorage.getItem("nie_avatar_ai") || "https://i.imgur.com/7yUvePI.png";
+    imgAi.src = avatarAi || "";
 
-    let aiBubble = document.createElement("div");
-    aiBubble.className = "msg ai";
-    aiBubble.innerText = "……";
+    let bubbleAi = document.createElement("div");
+    bubbleAi.className = "msg ai";
+    bubbleAi.innerText = "……";
 
     rowAi.appendChild(imgAi);
-    rowAi.appendChild(aiBubble);
+    rowAi.appendChild(bubbleAi);
     chat.appendChild(rowAi);
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        // 自动拼接 chat 接口
-        let chatUrl = apiUrl.replace(/\/$/, "");
-        if (!chatUrl.endsWith("/v1/chat/completions")) {
-            chatUrl += "/v1/chat/completions";
-        }
+        // 自动拼接 /v1/chat/completions
+        let url = apiUrl.replace(/\/$/, "") + "/v1/chat/completions";
 
-        let res = await fetch(chatUrl, {
+        let res = await fetch(url, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${apiKey}`,
@@ -498,24 +343,22 @@ async function sendMsg() {
             },
             body: JSON.stringify({
                 model: modelName,
-                messages: [
-                    { role: "user", content: text }
-                ]
+                messages: [{ role: "user", content: text }]
             })
         });
 
         let data = await res.json();
-        let reply = data.choices?.[0]?.message?.content || "（AI 未返回内容）";
+        let reply = data?.choices?.[0]?.message?.content || "(AI 无响应)";
 
-        aiBubble.innerText = reply;
+        bubbleAi.innerText = reply;
         chat.scrollTop = chat.scrollHeight;
 
     } catch (err) {
-        aiBubble.innerText = "⚠ AI 调用失败";
+        bubbleAi.innerText = "⚠ 调用失败，请检查 API";
         console.error(err);
     }
-
-// 设置聊天背景（壁纸）
+}  
+/*********** 外观：设置壁纸 ***********/
 function setWallpaper(event) {
     let file = event.target.files[0];
     if (!file) return;
@@ -524,13 +367,19 @@ function setWallpaper(event) {
     reader.onload = function(e) {
         let url = e.target.result;
 
-        document.getElementById("chat").style.backgroundImage = `url(${url})`;
+        let chat = document.getElementById("chat");
+        chat.style.backgroundImage = `url(${url})`;
+        chat.style.backgroundSize = "cover";
+        chat.style.backgroundPosition = "center";
+
         localStorage.setItem("nie_wallpaper", url);
+        wallpaper = url;
     };
     reader.readAsDataURL(file);
 }
 
-// 设置用户头像
+
+/*********** 外观：用户头像 ***********/
 function setAvatarMe(event) {
     let file = event.target.files[0];
     if (!file) return;
@@ -538,13 +387,17 @@ function setAvatarMe(event) {
     let reader = new FileReader();
     reader.onload = function(e) {
         let url = e.target.result;
+
         localStorage.setItem("nie_avatar_me", url);
+        avatarMe = url;
+
         alert("用户头像已更新！");
     };
     reader.readAsDataURL(file);
 }
 
-// 设置 AI 头像
+
+/*********** 外观：AI 头像 ***********/
 function setAvatarAi(event) {
     let file = event.target.files[0];
     if (!file) return;
@@ -552,12 +405,15 @@ function setAvatarAi(event) {
     let reader = new FileReader();
     reader.onload = function(e) {
         let url = e.target.result;
+
         localStorage.setItem("nie_avatar_ai", url);
+        avatarAi = url;
+
         alert("AI 头像已更新！");
     };
     reader.readAsDataURL(file);
 }
-            
 </script>
+
 </body>
-</html>
+</html> 
