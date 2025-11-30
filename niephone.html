@@ -279,13 +279,18 @@ async function loadModels() {
     }
 }
     
+// 发送消息到 API（自动补全 API）
 async function sendMsg() {
-    let text = document.getElementById("msgInput").value;
+    let text = document.getElementById("msgInput").value.trim();
     if (!text) return;
 
     let chat = document.getElementById("chat");
 
-    // 用户消息
+    // 读取头像
+    let avatarMe = localStorage.getItem("nie_avatar_me");
+    let avatarAi = localStorage.getItem("nie_avatar_ai");
+
+    // --- 显示自己的消息（含头像） ---
     let rowMe = document.createElement("div");
     rowMe.className = "msg-row";
     rowMe.style.justifyContent = "flex-end";
@@ -296,8 +301,7 @@ async function sendMsg() {
 
     let imgMe = document.createElement("img");
     imgMe.className = "avatar-me";
-    imgMe.src = localStorage.getItem("nie_avatar_me") ||
-                "https://i.imgur.com/4ZQZ4fP.png";
+    imgMe.src = avatarMe || "https://i.imgur.com/8Km9tLL.png";
 
     rowMe.appendChild(meBubble);
     rowMe.appendChild(imgMe);
@@ -306,28 +310,27 @@ async function sendMsg() {
     document.getElementById("msgInput").value = "";
     chat.scrollTop = chat.scrollHeight;
 
-    // 没设置 API 时提示
+    // --- 检查 API 设定 ---
     if (!apiKey || !apiUrl || !modelName) {
         let warn = document.createElement("div");
         warn.className = "msg ai";
-        warn.innerText = "⚠ 请先进入设置配置 API";
+        warn.innerText = "⚠ 请先进入设置填写 API 配置。";
         chat.appendChild(warn);
         chat.scrollTop = chat.scrollHeight;
         return;
     }
 
-    // AI 正在思考
+    // --- AI 思考提示（含头像） ---
     let rowAi = document.createElement("div");
     rowAi.className = "msg-row";
 
     let imgAi = document.createElement("img");
     imgAi.className = "avatar-ai";
-    imgAi.src = localStorage.getItem("nie_avatar_ai") ||
-                "https://i.imgur.com/Z7AzH2z.png";
+    imgAi.src = avatarAi || "https://i.imgur.com/0y8Ftya.png";
 
     let aiBubble = document.createElement("div");
     aiBubble.className = "msg ai";
-    aiBubble.innerText = "……";
+    aiBubble.innerText = "（AI 正在思考…）";
 
     rowAi.appendChild(imgAi);
     rowAi.appendChild(aiBubble);
@@ -335,35 +338,45 @@ async function sendMsg() {
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        // 自动拼接 /v1/chat/completions 接口
-        let chatUrl = apiUrl.replace(/\/$/, "");
-        if (!chatUrl.includes("/chat/completions")) {
-            chatUrl += "/v1/chat/completions";
-        }
+        // --- 自动补全 API 路径（你只需要填 https://api521.pro/v1） ---
+        let chatUrl = apiUrl;
+        chatUrl = chatUrl.replace(/\/+$/, ""); // 去掉最后的斜杠
+        chatUrl += "/chat/completions";        // 自动拼接 API 终点
 
+        // --- 请求 API ---
         let res = await fetch(chatUrl, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
             },
             body: JSON.stringify({
                 model: modelName,
-                messages: [{ role: "user", content: text }]
+                messages: [
+                    { role: "user", content: text }
+                ]
             })
         });
 
         let data = await res.json();
-        let reply = data.choices?.[0]?.message?.content || "(AI 无回复)";
+        console.log("AI 返回：", data);
+
+        // --- 兼容不同返回格式 ---
+        let reply =
+            data.choices?.[0]?.message?.content ||
+            data.choices?.[0]?.text ||
+            data.output_text ||
+            data.reply ||
+            "（AI 无回复）";
+
         aiBubble.innerText = reply;
+        chat.scrollTop = chat.scrollHeight;
 
     } catch (err) {
-        aiBubble.innerText = "⚠ AI 调用失败";
+        aiBubble.innerText = "⚠ AI 调用失败，请检查 API。";
         console.error(err);
     }
-
-    chat.scrollTop = chat.scrollHeight;
-}
+            }
     
 /*********** 外观：设置壁纸 ***********/
 function setWallpaper(event) {
