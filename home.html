@@ -1,510 +1,228 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>niephone — Home</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>niephone - Home</title>
+
 <style>
-  :root{
-    --bg:#0a0a0a;
-    --panel: rgba(255,255,255,0.06);
-    --accent:#3fb86f;
-    --text:#fff;
-    --muted: rgba(255,255,255,0.6);
-    --icon-size: 96px; /* 可被 js 调整 */
-    --icon-radius: 50%; /* 圆形 */
-  }
-  html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-  body{background:var(--bg);color:var(--text);overflow:hidden;display:flex;justify-content:center;align-items:center;padding:12px;}
-  /* 手机壳样式 */
-  .phone {
-    width: 360px;
-    max-width: 96%;
-    height: 760px;
-    max-height: 96vh;
-    border-radius:22px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3));
+  body{
+    margin:0;
+    background:#000;
+    color:#fff;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
     overflow:hidden;
-    position:relative;
-    display:flex;
-    flex-direction:column;
   }
-  /* 顶栏 */
-  .topbar{
-    height:58px;
+
+  /* 整个手机界面 */
+  .phone{
+    width:360px;
+    max-width:95%;
+    height:760px;
+    max-height:95vh;
+    margin:20px auto;
+    border-radius:22px;
+    overflow:hidden;
+    background:#000;
+    position:relative;
+  }
+
+  /* 壁纸 */
+  .wallpaper{
+    position:absolute;
+    inset:0;
+    background-size:cover;
+    background-position:center;
+    filter:brightness(0.85);
+    z-index:1;
+  }
+
+  .overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.3);
+    z-index:2;
+  }
+
+  /* 内容层 */
+  .content{
+    position:relative;
+    z-index:3;
+    width:100%;
+    height:100%;
+    padding:20px;
+    box-sizing:border-box;
+  }
+
+  /* 顶部大图（长方形） */
+  .big-img{
+    width:100%;
+    height:160px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.1);
     display:flex;
     align-items:center;
+    justify-content:center;
+    font-size:24px;
+    font-weight:600;
+    margin-bottom:30px;
+    overflow:hidden;
+  }
+  .big-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  /* 通用图标按钮 */
+  .btn{
+    width:130px;
+    height:90px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.13);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    margin-bottom:20px;
+    cursor:pointer;
+    backdrop-filter:blur(6px);
+  }
+
+  /* 底部菜单 */
+  .bottom-row{
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:90%;
+    display:flex;
     justify-content:space-between;
-    padding:8px 14px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    backdrop-filter: blur(6px);
   }
-  .title{font-size:18px;font-weight:600;color:var(--text);}
-  .top-actions{display:flex;gap:8px;align-items:center;}
-  .icon-btn{width:36px;height:36px;border-radius:8px;background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);cursor:pointer}
-  /* 主屏内容：可左右滑切换页面 */
-  .pages-wrap{flex:1;position:relative;overflow:hidden;}
-  .pages{height:100%;display:flex;transition:transform .28s ease;}
-  .page{flex:0 0 100%;height:100%;padding:18px;box-sizing:border-box;position:relative;overflow:auto;}
-  /* 背景（壁纸） */
-  .page .wall{position:absolute;inset:0;background-size:cover;background-position:center;filter:contrast(.95);z-index:0}
-  .page .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.2),rgba(0,0,0,0.15));z-index:1}
-  /* 图标区 */
-  .dock{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:18px;align-content:flex-start; padding-top:18px;}
-  .app{
-    width:var(--icon-size);
-    height:var(--icon-size);
-    display:flex;flex-direction:column;align-items:center;gap:6px;
-    cursor:grab; user-select:none;
+
+  .small-btn{
+    width:100px;
+    height:80px;
+    background:rgba(255,255,255,0.13);
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    cursor:pointer;
+    backdrop-filter:blur(6px);
   }
-  .app.dragging{opacity:.5;transform:scale(.98);}
-  .app .btn{
-    width:100%;height:calc(var(--icon-size) - 28px);
-    border-radius:var(--icon-radius);
-    background:rgba(255,255,255,0.06);
-    display:flex;align-items:center;justify-content:center;overflow:hidden;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
-    transition:transform .12s;
-  }
-  .app .btn img{width:90%;height:90%;object-fit:cover;border-radius:inherit;display:block;}
-  .app .label{font-size:14px;color:var(--text);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
-  .app:active .btn{transform:scale(.98);}
-  /* 底部栏 */
-  .bottombar{height:94px;display:flex;align-items:center;gap:18px;padding:12px;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.04));z-index:4;}
-  .btn-big{padding:12px 18px;border-radius:12px;background:var(--panel);color:var(--text);font-weight:600;cursor:pointer}
-  .slider{display:flex;align-items:center;gap:8px}
-  input[type=range]{width:120px}
-  /* 弹窗/编辑面板 */
-  .modal{position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:9999}
-  .modal.show{display:flex}
-  .card{width:320px;background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,0.6);color:var(--text)}
-  .card h3{margin:0 0 8px 0}
-  .field{margin:8px 0;display:flex;flex-direction:column;gap:6px}
-  .field input[type=text], .field input[type=url], .field select, .field textarea {padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)}
-  .row{display:flex;gap:8px}
-  .small{font-size:13px;color:var(--muted)}
-  /* 帮助提示 */
-  .hint{position:absolute;right:12px;bottom:12px;font-size:12px;color:var(--muted);z-index:6}
-  /* 响应 */
-  @media (max-width:420px){ .phone{width:92vw;height:92vh} }
 </style>
 </head>
+
 <body>
-  <div class="phone" id="phone">
-    <div class="topbar">
-      <div class="title">niephone</div>
-      <div class="top-actions">
-        <div class="icon-btn" id="openSettings" title="设置">⚙</div>
-        <div class="icon-btn" id="openWallpaper" title="壁纸">🖼</div>
-      </div>
+<div class="phone">
+
+  <div class="wallpaper" id="wall"></div>
+  <div class="overlay"></div>
+
+  <div class="content">
+
+    <!-- 顶部大图 -->
+    <div class="big-img" id="bigImageBox">
+      <span id="bigImageText">自定义图片 *长方形*</span>
     </div>
 
-    <div class="pages-wrap">
-      <div class="pages" id="pages">
-        <!-- page 0 主屏 -->
-        <div class="page" data-index="0">
-          <div class="wall" id="wall-0"></div>
-          <div class="overlay"></div>
-          <div class="dock" id="dock-0" style="padding-top:70px; --columns:4;"></div>
-        </div>
-        <!-- page 1 聊天页预览/快捷 -->
-        <div class="page" data-index="1">
-          <div class="wall" id="wall-1"></div>
-          <div class="overlay"></div>
-          <div style="position:relative;z-index:2;padding-top:40px;">
-            <div style="padding:12px;color:var(--muted)">快捷</div>
-            <div class="dock" id="dock-1"></div>
-          </div>
-        </div>
-        <!-- page 2 更多（记忆、API） -->
-        <div class="page" data-index="2">
-          <div class="wall" id="wall-2"></div>
-          <div class="overlay"></div>
-          <div style="position:relative;z-index:2;padding:18px;">
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <div class="app" data-id="api">
-                <div class="btn"><img src="" alt="api" id="icon-sample-api" onerror="this.style.display='none'">⚙</div>
-                <div class="label">API 设置</div>
-              </div>
-              <div class="app" data-id="memory">
-                <div class="btn"><img src="" alt="mem" id="icon-sample-memory" onerror="this.style.display='none'">🧠</div>
-                <div class="label">记忆</div>
-              </div>
-              <div class="app" data-id="role">
-                <div class="btn"><img src="" alt="role" id="icon-sample-role" onerror="this.style.display='none'">👤</div>
-                <div class="label">人设</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- 右侧按钮 -->
+    <div style="position:absolute; right:20px; top:210px;">
+      <div class="btn" id="chatBtn">聊天</div>
+      <div class="btn" id="roleBtn">人设</div>
     </div>
 
-    <div class="bottombar">
-      <div class="btn-big" id="addApp">+ 添加图标</div>
-      <div class="slider">
-        <div class="small">图标大小</div>
-        <input type="range" id="sizeRange" min="64" max="140" value="96">
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px">
-        <div class="btn-big" id="prevPage">◀</div>
-        <div class="btn-big" id="nextPage">▶</div>
-      </div>
+    <!-- 底部功能栏 -->
+    <div class="bottom-row">
+      <div class="small-btn" id="apiBtn">API设置</div>
+      <div class="small-btn" id="memoryBtn">记忆</div>
+      <div class="small-btn" id="extraBtn">待加</div>
     </div>
 
-    <div class="hint">长按图标编辑 · 拖拽排序会保存</div>
   </div>
-
-  <!-- 编辑弹窗 -->
-  <div class="modal" id="modal">
-    <div class="card" id="modalCard">
-      <h3 id="modalTitle">编辑图标</h3>
-      <div class="field">
-        <label class="small">图标名字</label>
-        <input type="text" id="appName">
-      </div>
-      <div class="field">
-        <label class="small">图标图片（URL）</label>
-        <input type="url" id="appIconUrl" placeholder="https://... 或留空上传本地">
-      </div>
-      <div class="field">
-        <label class="small">或上传本地图片（会覆盖 URL）</label>
-        <input type="file" id="appIconFile" accept="image/*">
-      </div>
-      <div class="field">
-        <label class="small">点击打开链接（例如 chat.html）</label>
-        <input type="text" id="appTarget" placeholder="chat.html">
-      </div>
-      <div class="row">
-        <div class="btn-big" id="saveApp">保存</div>
-        <div class="btn-big" id="deleteApp" style="background:rgba(255,60,60,0.12)">删除</div>
-        <div class="btn-big" id="cancelApp" style="background:rgba(255,255,255,0.03)">取消</div>
-      </div>
-    </div>
-  </div>
-  <script>
-/* ---------- 简易持久化层 ---------- */
-const STORE_KEY = 'niephone_home_v2';
-const DEFAULT_ICONS = [
-  {id:'chat',name:'聊天',icon:'',target:'chat.html'},
-  {id:'role',name:'人设',icon:'',target:'role.html'},
-  {id:'api',name:'API 设置',icon:'',target:'api.html'},
-  {id:'memory',name:'记忆',icon:'',target:'memory.html'}
-];
-
-function loadStore(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    if(!raw) return {icons: DEFAULT_ICONS, walls: [], size:96};
-    return JSON.parse(raw);
-  }catch(e){
-    console.error(e);
-    return {icons: DEFAULT_ICONS, walls: [], size:96};
-  }
+</div>
+<script>
+/* ===== 读取与保存 ===== */
+function save(key, value){
+  localStorage.setItem(key, value);
 }
-function saveStore(s){
-  localStorage.setItem(STORE_KEY, JSON.stringify(s));
+function load(key){
+  return localStorage.getItem(key) || "";
 }
 
-/* ---------- 渲染与交互 ---------- */
-let store = loadStore();
-const pagesEl = document.getElementById('pages');
-const docks = [
-  document.getElementById('dock-0'),
-  document.getElementById('dock-1'),
-  document.getElementById('dock-2')
-];
-const walls = [
-  document.getElementById('wall-0'),
-  document.getElementById('wall-1'),
-  document.getElementById('wall-2')
-];
+/* ===== 壁纸 ===== */
+const wall = document.getElementById("wall");
+const savedWall = load("home_wallpaper");
+if(savedWall) wall.style.backgroundImage = `url(${savedWall})`;
 
-let currentPage = 0;
-function setPage(i){
-  currentPage = Math.max(0, Math.min(i, pagesEl.children.length -1));
-  pagesEl.style.transform = `translateX(-${currentPage*100}%)`;
-}
-document.getElementById('prevPage').addEventListener('click', ()=>setPage(currentPage-1));
-document.getElementById('nextPage').addEventListener('click', ()=>setPage(currentPage+1));
-
-/* 更新图标大小 */
-function applySize(){
-  document.documentElement.style.setProperty('--icon-size', store.size + 'px');
-}
-document.getElementById('sizeRange').value = store.size || 96;
-document.getElementById('sizeRange').addEventListener('input', e=>{
-  store.size = parseInt(e.target.value);
-  applySize();
-  saveStore(store);
-});
-applySize();
-
-/* 渲染图标（主屏只） */
-function renderAll(){
-  // 清空主 dock
-  docks.forEach(d=>d.innerHTML='');
-  // 按照 store.icons 放到第一个页面，后续可修改分页逻辑
-  (store.icons || []).forEach((app, idx)=>{
-    const el = createAppEl(app, idx);
-    docks[0].appendChild(el);
-  });
-  // 填充第二页和第三页的快捷
-  // Example: 把 API/role/memory 加到页2，如果它们存在
-  ['chat','role','api','memory'].forEach(k=>{
-    const a = (store.icons||[]).find(x=>x.id===k);
-    if(a){
-      const el = createAppEl(a);
-      // avoid duplicates: if in page0 already skip - here put one in page2 small
-      docks[1].appendChild(el.cloneNode(true));
-    }
-  });
-  // 墙壁（wall）设置
-  (store.walls || []).forEach((w, i)=>{ if(walls[i]) walls[i].style.backgroundImage = w ? `url(${w})` : ''; });
-}
-
-/* 创建单个 app 元素 */
-function createAppEl(app, idx){
-  const wrap = document.createElement('div');
-  wrap.className = 'app';
-  wrap.draggable = true;
-  wrap.dataset.id = app.id || ('app_' + Math.random().toString(36).slice(2,9));
-  // button
-  const btn = document.createElement('div');
-  btn.className = 'btn';
-  const img = document.createElement('img');
-  if(app.icon){
-    img.src = app.icon;
-    img.onerror = () => { img.style.display='none'; };
-  } else {
-    img.style.display='none';
-  }
-  btn.appendChild(img);
-  // label
-  const label = document.createElement('div');
-  label.className = 'label';
-  label.textContent = app.name || '无名';
-  wrap.appendChild(btn);
-  wrap.appendChild(label);
-
-  // 点击打开目标
-  wrap.addEventListener('click', (ev)=>{
-    if(ev.target.tagName==='INPUT' || ev.target.tagName==='TEXTAREA') return;
-    if(app.target){
-      // 打开链接（在同目录下）
-      window.location.href = app.target;
-    }
-  });
-
-  // 长按（显示编辑）
-  let pressTimer = null;
-  wrap.addEventListener('touchstart', (e)=>{
-    pressTimer = setTimeout(()=>openEditor(app, wrap), 550);
-  }, {passive:true});
-  wrap.addEventListener('mousedown', (e)=>{
-    pressTimer = setTimeout(()=>openEditor(app, wrap), 550);
-  });
-  ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>{
-    wrap.addEventListener(ev, ()=>{ clearTimeout(pressTimer); pressTimer=null; });
-  });
-
-  // 拖拽
-  wrap.addEventListener('dragstart', (e)=>{
-    wrap.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', wrap.dataset.id);
-  });
-  wrap.addEventListener('dragend', ()=>{
-    wrap.classList.remove('dragging');
-  });
-
-  // 允许放置
-  wrap.addEventListener('dragover', e=>e.preventDefault());
-  wrap.addEventListener('drop', (e)=>{
-    e.preventDefault();
-    const draggedId = e.dataTransfer.getData('text/plain');
-    if(!draggedId) return;
-    const parent = wrap.parentElement;
-    const draggedEl = parent.querySelector(`[data-id="${draggedId}"]`);
-    if(!draggedEl || draggedEl === wrap) return;
-    parent.insertBefore(draggedEl, wrap.nextSibling);
-    persistOrder();
-  });
-
-  return wrap;
-}
-
-/* 保存图标的顺序到 store */
-function persistOrder(){
-  const children = Array.from(docks[0].children);
-  const newIcons = children.map(ch=>{
-    const id = ch.dataset.id;
-    // find in store by id (fallback)
-    const found = (store.icons||[]).find(x=>x.id===id);
-    return found || {id:id,name:ch.querySelector('.label').textContent,icon:'',target:''};
-  });
-  store.icons = newIcons;
-  saveStore(store);
-}
-
-/* 添加图标按钮 */
-document.getElementById('addApp').addEventListener('click', ()=>{
-  openEditor(null);
-});
-
-/* 打开编辑器（传 app 或 null 新建） */
-const modal = document.getElementById('modal');
-const inputName = document.getElementById('appName');
-const inputUrl = document.getElementById('appIconUrl');
-const inputFile = document.getElementById('appIconFile');
-const inputTarget = document.getElementById('appTarget');
-let currentEditingId = null;
-
-function openEditor(app, el){
-  modal.classList.add('show');
-  if(app){
-    currentEditingId = app.id;
-    inputName.value = app.name || '';
-    inputUrl.value = app.icon || '';
-    inputTarget.value = app.target || '';
-  }else{
-    currentEditingId = null;
-    inputName.value = '';
-    inputUrl.value = '';
-    inputTarget.value = '';
-  }
-}
-
-/* 取消 */
-document.getElementById('cancelApp').addEventListener('click', ()=>{ modal.classList.remove('show'); });
-
-/* 保存图标 */
-document.getElementById('saveApp').addEventListener('click', async ()=>{
-  const name = inputName.value.trim() || '无名';
-  const url = inputUrl.value.trim();
-  let fileData = null;
-  if(inputFile.files && inputFile.files[0]){
-    fileData = await readFileAsDataURL(inputFile.files[0]);
-  }
-  if(currentEditingId){
-    // update existing
-    const idx = (store.icons||[]).findIndex(x=>x.id === currentEditingId);
-    if(idx >= 0){
-      store.icons[idx].name = name;
-      store.icons[idx].icon = fileData || url || '';
-      store.icons[idx].target = inputTarget.value.trim();
-    }
-  } else {
-    // create new id
-    const id = 'app_' + Math.random().toString(36).slice(2,9);
-    const newApp = {id, name, icon: fileData || url || '', target: inputTarget.value.trim()};
-    store.icons = store.icons || [];
-    store.icons.push(newApp);
-  }
-  saveStore(store);
-  modal.classList.remove('show');
-  renderAll();
-  inputFile.value = '';
-});
-
-/* 删除图标 */
-document.getElementById('deleteApp').addEventListener('click', ()=>{
-  if(!currentEditingId){ modal.classList.remove('show'); return; }
-  store.icons = (store.icons||[]).filter(x=>x.id !== currentEditingId);
-  saveStore(store);
-  modal.classList.remove('show');
-  renderAll();
-});
-
-/* 工具：读取文件为 dataURL */
-function readFileAsDataURL(file){
-  return new Promise((res,rej)=>{
-    const fr = new FileReader();
-    fr.onload = (e)=>res(e.target.result);
-    fr.onerror = (e)=>rej(e);
-    fr.readAsDataURL(file);
-  });
-}
-
-/* 初始化 */
-renderAll();
-
-/* 页面滑动（触摸）支持：左右滑动切换页 */
-let startX = null;
-let isTouching = false;
-const pagesWrap = document.querySelector('.pages-wrap');
-pagesWrap.addEventListener('touchstart', (e)=>{ startX = e.touches[0].clientX; isTouching=true; });
-pagesWrap.addEventListener('touchmove', (e)=>{
-  if(!isTouching) return;
-  const x = e.touches[0].clientX;
-  const dx = x - startX;
-  // small translate for feel
-  pagesEl.style.transform = `translateX(${ -currentPage*100 + (dx / pagesWrap.clientWidth * 100)}%)`;
-});
-pagesWrap.addEventListener('touchend', (e)=>{
-  if(!isTouching) return;
-  const endX = e.changedTouches[0].clientX;
-  const dx = endX - startX;
-  isTouching=false;
-  if(Math.abs(dx) > 40){
-    if(dx < 0) setPage(currentPage + 1);
-    else setPage(currentPage - 1);
-  } else {
-    setPage(currentPage);
-  }
-});
- /* ---------- 壁纸与设置弹窗 ---------- */
-document.getElementById('openWallpaper').addEventListener('click', ()=>{
-  // 简单使用浏览器 prompt 做快速改墙纸（也可扩展为独立 modal）
-  const url = prompt('输入壁纸 URL（留空恢复默认）');
+/* 点击壁纸切换 */
+wall.addEventListener("click", ()=>{
+  let url = prompt("输入壁纸 URL（留空恢复默认）");
   if(url === null) return;
-  // 将 url 赋给第一个页面墙纸（示例）
-  store.walls = store.walls || [];
-  store.walls[0] = url || '';
-  saveStore(store);
-  if(walls[0]) walls[0].style.backgroundImage = url ? `url(${url})` : '';
+  save("home_wallpaper", url);
+  wall.style.backgroundImage = url ? `url(${url})` : "";
 });
 
-document.getElementById('openSettings').addEventListener('click', ()=>{
-  // 打开更完整的设置：这里用 prompt 举例，也可以扩成 modal
-  const t = prompt('主题（dark/light），留空保持当前');
-  if(t === null) return;
-  if(t === 'light'){
-    document.documentElement.style.setProperty('--bg','#f5f5f6');
-    document.documentElement.style.setProperty('--text','#111');
-    document.documentElement.style.setProperty('--panel','rgba(0,0,0,0.03)');
-  } else if(t === 'dark'){
-    document.documentElement.style.setProperty('--bg','#0a0a0a');
-    document.documentElement.style.setProperty('--text','#fff');
-    document.documentElement.style.setProperty('--panel','rgba(255,255,255,0.04)');
+/* ===== 顶部大图 ===== */
+
+const bigImageBox = document.getElementById("bigImageBox");
+const bigImageText = document.getElementById("bigImageText");
+let savedBigImg = load("home_bigimg");
+
+if(savedBigImg){
+  let img = document.createElement("img");
+  img.src = savedBigImg;
+  bigImageBox.innerHTML = "";
+  bigImageBox.appendChild(img);
+}
+
+/* 点击自定义大图 */
+bigImageBox.addEventListener("click", ()=>{
+
+  let type = prompt("输入 1=链接图片，2=上传本地图片","1");
+
+  if(type === "1"){
+    let url = prompt("输入图片 URL：");
+    if(!url) return;
+    save("home_bigimg", url);
+
+    let img = document.createElement("img");
+    img.src = url;
+    bigImageBox.innerHTML = "";
+    bigImageBox.appendChild(img);
+  }
+
+  if(type === "2"){
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = ()=>{
+      let file = input.files[0];
+      let reader = new FileReader();
+      reader.onload = (e)=>{
+        save("home_bigimg", e.target.result);
+
+        let img = document.createElement("img");
+        img.src = e.target.result;
+        bigImageBox.innerHTML = "";
+        bigImageBox.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
   }
 });
+ /* ===== 按钮跳转 ===== */
 
-/* ---------- 删除 AI / 其它引用：保留兼容（如果你后续把 chat 集成会用到） ---------- */
-/* ---------- 多条回复分段展示功能（如果你要 chat 页面在这里注册也可以复用） ---------- */
-/* 这部分保留空骨架，chat 页面单独实现分段展示更合适。若需要我可以把分段显示函数导出供 chat.html 调用。 */
+document.getElementById("chatBtn").onclick = ()=>location.href="chat.html";
+document.getElementById("roleBtn").onclick = ()=>location.href="role.html";
+document.getElementById("apiBtn").onclick  = ()=>location.href="api.html";
+document.getElementById("memoryBtn").onclick  = ()=>location.href="memory.html";
+document.getElementById("extraBtn").onclick  = ()=>alert("你可以在这里加别的功能页面");
 
-/* ---------- 一些快速恢复工具（开发用） ---------- */
-window.__niephone = {
-  store,
-  save: ()=>saveStore(store),
-  reset: ()=>{ localStorage.removeItem(STORE_KEY); location.reload(); }
-};
-
-/* ---------- 初始墙纸渲染 ---------- */
-(function initWalls(){
-  store.walls = store.walls || [];
-  for(let i=0;i<walls.length;i++){
-    if(store.walls[i]) walls[i].style.backgroundImage = `url(${store.walls[i]})`;
-  }
-})();
-
-/* ---------- 当页面关闭或隐藏时保存（保险） ---------- */
-window.addEventListener('beforeunload', ()=>saveStore(store));
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') saveStore(store); });
-
-/* ---------- 触发 render（外部调用） ---------- */
-renderAll();
+/* 结束 */
 </script>
 </body>
-</html>     
+</html> 
