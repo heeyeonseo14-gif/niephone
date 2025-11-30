@@ -519,36 +519,56 @@ async function sendMsg() {
 function setWallpaper(event) {
     let file = event.target.files[0];
     if (!file) return;
+
     let reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         let url = e.target.result;
-        document.getElementById("chat").style.backgroundImage = `url(${url})`;
+
+        // 设置聊天区背景
+        let chat = document.getElementById("chat");
+        chat.style.backgroundImage = `url(${url})`;
+        chat.style.backgroundSize = "cover";
+        chat.style.backgroundPosition = "center";
+
+        // 写入 localStorage
         localStorage.setItem("nie_wallpaper", url);
+
+        alert("壁纸已更新！");
     };
     reader.readAsDataURL(file);
 }
 
-// 设置用户头像
+
+// 设置用户头像（我）
 function setAvatarMe(event) {
     let file = event.target.files[0];
     if (!file) return;
+
     let reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         let url = e.target.result;
+
+        // 保存到 localStorage
         localStorage.setItem("nie_avatar_me", url);
+
         alert("用户头像已更新！");
     };
     reader.readAsDataURL(file);
 }
 
+
 // 设置 AI 头像
 function setAvatarAi(event) {
     let file = event.target.files[0];
     if (!file) return;
+
     let reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         let url = e.target.result;
+
+        // 保存到 localStorage
         localStorage.setItem("nie_avatar_ai", url);
+
         alert("AI 头像已更新！");
     };
     reader.readAsDataURL(file);
