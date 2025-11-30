@@ -7,111 +7,148 @@
 <style>
 body {
     margin:0;
-    background:#f5f5f5;
-    font-family:Arial;
+    background:#e9eef3;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
     display:flex;
     justify-content:center;
-    padding-top:20px;
+    padding-top:25px;
 }
 
+/* 手机壳 */
 .phone {
-    width:380px;
-    height:700px;
+    width:390px;
+    height:780px;
     background:white;
-    border-radius:25px;
-    box-shadow:0 0 15px rgba(0,0,0,0.2);
+    border-radius:32px;
+    box-shadow:0 10px 35px rgba(0,0,0,0.15);
     display:flex;
     flex-direction:column;
     overflow:hidden;
+    position:relative;
 }
 
+/* 顶部状态栏 */
+.status-bar {
+    height:20px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 12px;
+    font-size:12px;
+    color:#555;
+}
+
+/* 顶部标题栏 */
 .header {
     background:#07c160;
-    padding:12px;
-    font-size:20px;
+    padding:14px;
+    font-size:22px;
     color:white;
     position:relative;
     text-align:center;
+    letter-spacing:1px;
 }
 
 .settings-btn {
     position:absolute;
-    right:15px;
-    top:12px;
+    right:16px;
+    top:14px;
     color:white;
     background:none;
     border:none;
-    font-size:16px;
+    font-size:20px;
 }
 
+/* 聊天框 */
 .chat-box {
     flex:1;
-    padding:10px;
+    padding:14px;
     overflow-y:auto;
+    background:#f6f6f6;
 }
 
+/* 气泡基础 */
 .msg {
     max-width:75%;
-    padding:10px 14px;
-    border-radius:12px;
-    margin:8px 0;
+    padding:12px 16px;
+    border-radius:16px;
+    margin:10px 0;
     word-break:break-word;
+    font-size:16px;
+    line-height:1.5;
+    box-shadow:0px 2px 6px rgba(0,0,0,0.1);
 }
 
-.me {
-    background:#95ec69;
+/* 我的消息 */
+.msg.me {
+    background:#9fe8a9;
     margin-left:auto;
+    border-bottom-right-radius:4px;
 }
 
-.ai {
-    background:#e5e5e5;
+/* AI 消息 */
+.msg.ai {
+    background:white;
     margin-right:auto;
+    border-bottom-left-radius:4px;
 }
 
+/* 输入区域 */
 .input-area {
     display:flex;
-    padding:10px;
+    padding:12px;
+    background:white;
     border-top:1px solid #ddd;
 }
 
-input {
+#msgInput {
     flex:1;
-    padding:10px;
-    border-radius:10px;
+    padding:12px 15px;
+    border-radius:25px;
     border:1px solid #ccc;
+    font-size:16px;
 }
 
-button {
+/* 发送按钮 */
+.send-btn {
     margin-left:10px;
-    padding:10px 15px;
+    width:48px;
+    height:48px;
+    border-radius:24px;
     border:none;
     background:#07c160;
     color:white;
-    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
 }
 
+/* 设置面板 */
 .settings-panel {
     position:absolute;
     top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.5);
+    background:rgba(0,0,0,0.45);
     display:none;
     justify-content:center;
     align-items:center;
+    backdrop-filter:blur(5px);
 }
 
 .panel-box {
     background:white;
-    width:80%;
-    padding:20px;
-    border-radius:15px;
+    width:78%;
+    padding:22px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.2);
 }
 
 .panel-box input, .panel-box select {
     width:100%;
-    margin:10px 0;
-    padding:10px;
-    border-radius:10px;
+    margin:12px 0;
+    padding:12px;
+    border-radius:12px;
     border:1px solid #ccc;
+    font-size:15px;
 }
 </style>
 </head>
@@ -127,7 +164,7 @@ button {
     <!-- 设置面板 -->
     <div class="settings-panel" id="settingsPanel">
         <div class="panel-box">
-            <h3>API 设置</h3>
+            <h3 style="margin-top:0;">API 设置</h3>
 
             <input id="apiUrl" placeholder="API 地址，如 https://api521.pro/v1" />
             <input id="apiKey" placeholder="API Key" />
@@ -137,8 +174,12 @@ button {
                 <option>加载中…</option>
             </select>
 
-            <button onclick="saveSettings()">保存</button>
-            <button style="margin-left:10px;background:#999;" onclick="closeSettings()">关闭</button>
+            <button onclick="saveSettings()" style="width:100%;background:#4CC38A;color:white;padding:12px;border-radius:14px;border:none;">
+                保存
+            </button>
+            <button onclick="closeSettings()" style="width:100%;margin-top:10px;background:#ccc;color:white;padding:12px;border-radius:14px;border:none;">
+                关闭
+            </button>
         </div>
     </div>
 
@@ -148,11 +189,10 @@ button {
     <!-- 输入区 -->
     <div class="input-area">
         <input id="msgInput" placeholder="输入消息…" />
-        <button onclick="sendMsg()">发送</button>
+        <button class="send-btn" onclick="sendMsg()">发送</button>
     </div>
 
-</div>
-
+    </div>
 <script>
 let apiKey = localStorage.getItem("nie_api_key") || "";
 let apiUrl = localStorage.getItem("nie_api_url") || "";
