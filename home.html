@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>niephone 主屏幕</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{
+  --bg-color: #dfe4ea;
+  --status-bg: #f1f2f6;
+  --text-color: #333;
+  --accent: #07c160;
+}
+
+/* 全局 */
+body{margin:0;background:var(--bg-color);font-family:-apple-system,BlinkMacSystemFont,Arial;display:flex;justify-content:center;padding-top:20px;}
+.phone{width:380px;height:700px;background:white;border-radius:30px;box-shadow:0 0 20px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;position:relative;background-size:cover;background-position:center;}
+
+/* 顶部状态栏 */
+.status-bar{height:35px;background:var(--status-bg);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:14px;color:var(--text-color);}
+
+/* 主屏格 */
+.home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:36px 26px;flex:1;}
+
+/* app icon */
+.app-icon{display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;}
+.app-icon img{width:66px;height:66px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.18);transition:transform .12s ease;}
+.app-icon span{display:block;margin-top:8px;font-size:14px;color:var(--text-color);}
+
+/* edit (shake) mode */
+.app-icon.editing img{transform:rotate(-6deg);animation:shake 0.6s infinite;}
+@keyframes shake{0%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}100%{transform:rotate(-2deg)}}
+
+/* bottom dock */
+.dock{height:70px;background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;border-top:1px solid rgba(0,0,0,0.05);}
+
+/* theme button */
+.theme-btn{position:absolute;right:14px;bottom:86px;background:rgba(0,0,0,0.06);padding:8px;border-radius:10px;cursor:pointer}
+
+/* small helper text */
+.helper{font-size:12px;color:#666;text-align:center;margin-top:6px;}
+
+/* modal overlay */
+.modal-overlay{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:9999;}
+.modal{width:320px;background:white;border-radius:12px;padding:14px;box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+
+/* modal inputs */
+.modal input[type="text"], .modal input[type="url"], .modal .url-input {width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin:8px 0;}
+.modal .row{display:flex;gap:8px;}
+.modal button{flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:white;cursor:pointer;}
+.modal .cancel{background:#888}
+
+/* wallpaper preview small */
+.wall-preview{width:48px;height:48px;border-radius:8px;object-fit:cover;box-shadow:0 3px 8px rgba(0,0,0,0.2);}
+
+/* responsive minor */
+@media (max-width:420px){.phone{width:92vw;height:88vh;border-radius:20px}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+    <!-- status -->
+    <div class="status-bar">
+        <div id="time">12:00</div>
+        <div>🔋 98%</div>
+    </div>
+
+    <!-- 主屏 -->
+    <div class="home-grid" id="homeGrid">
+        <!-- 图标：注意 img id 便于替换 -->
+        <div class="app-icon" id="iconWrap_chat" data-key="chat" title="聊天">
+            <img id="icon_chat" src="https://i.imgur.com/paQ7B4N.png" alt="聊天">
+            <span>聊天</span>
+        </div>
+
+        <div class="app-icon" id="iconWrap_api" data-key="api" title="API 设置">
+            <img id="icon_api" src="https://i.imgur.com/0TZQbS3.png" alt="API">
+            <span>API 设置</span>
+        </div>
+
+        <div class="app-icon" id="iconWrap_style" data-key="style" title="外观设置">
+            <img id="icon_style" src="https://i.imgur.com/h6T8e9n.png" alt="外观">
+            <span>外观设置</span>
+        </div>
+
+        <div class="app-icon" id="iconWrap_role" data-key="role" title="人设设定">
+            <img id="icon_role" src="https://i.imgur.com/MYbGa1H.png" alt="人设">
+            <span>人设设定</span>
+        </div>
+
+        <div class="app-icon" id="iconWrap_memory" data-key="memory" title="记忆管理">
+            <img id="icon_memory" src="https://i.imgur.com/FUoZ1dX.png" alt="记忆">
+            <span>记忆管理</span>
+        </div>
+
+        <div class="app-icon" id="iconWrap_more" data-key="more" title="更多">
+            <img id="icon_more" src="https://i.imgur.com/ARc3tHp.png" alt="更多">
+            <span>更多</span>
+        </div>
+    </div>
+    <!-- dock -->
+    <div class="dock">
+        <div style="text-align:center;">
+            <div style="font-weight:bold">niephone</div>
+            <div class="helper">长按图标可编辑；长按空白更换壁纸</div>
+        </div>
+    </div>
+
+    <!-- 主题按钮 -->
+    <div class="theme-btn" id="themeBtn" title="主题">🎨</div>
+</div> <!-- phone end -->
+
+<!-- 编辑 modal（更换图标 / 输入 URL / 上传） -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div style="font-weight:bold" id="modalTitle">编辑图标</div>
+
+    <div style="margin-top:8px;">
+      <div style="font-size:13px;color:#555">当前预览</div>
+      <img id="modalPreview" class="wall-preview" src="">
+    </div>
+
+    <label style="margin-top:10px;">上传图片</label>
+    <input type="file" accept="image/*" id="modalFile">
+
+    <label>或输入图片链接 URL</label>
+    <input type="url" id="modalUrl" placeholder="https://...">
+
+    <div class="row" style="margin-top:8px;">
+      <button id="modalSave">保存</button>
+      <button id="modalCancel" class="cancel">取消</button>
+    </div>
+
+    <div style="height:6px"></div>
+    <div style="font-size:12px;color:#666">提示：上传或粘贴图片地址，图标将保存到浏览器。</div>
+  </div>
+</div>
+
+<script>
+// ---------- 初始化 time ----------
+function updateTime(){
+  const t=new Date();
+  const hh=String(t.getHours()).padStart(2,'0');
+  const mm=String(t.getMinutes()).padStart(2,'0');
+  document.getElementById('time').innerText = `${hh}:${mm}`;
+}
+setInterval(updateTime,60000); updateTime();
+
+// ---------- load saved wallpaper & icons ----------
+function applySavedSettings(){
+  // wallpaper
+  const wp = localStorage.getItem('home_wallpaper');
+  if(wp) document.getElementById('phone').style.backgroundImage = `url('${wp}')`;
+
+  // icons
+  const keys = ['chat','api','style','role','memory','more'];
+  keys.forEach(k=>{
+    const v = localStorage.getItem('icon_'+k);
+    if(v){
+      const img = document.getElementById('icon_'+k);
+      if(img) img.src = v;
+    }
+  });
+}
+applySavedSettings();
+
+// ---------- open app (basic navigation: load page) ----------
+function openApp(page){
+  // chat -> chat.html, api->api.html ...
+  window.location.href = page;
+}
+
+// ---------- long-press (enter edit mode) ----------
+let longPressTimer = null;
+let longPressTarget = null;
+const LONGPRESS_MS = 600;
+
+function onPressStart(e){
+  e.stopPropagation();
+  const wrap = e.currentTarget;
+  longPressTarget = wrap;
+  longPressTimer = setTimeout(()=>{ enterIconEdit(wrap); }, LONGPRESS_MS);
+}
+function onPressEnd(e){
+  clearTimeout(longPressTimer);
+  longPressTimer = null;
+  longPressTarget = null;
+}
+ // ---------- attach press handlers to icons ----------
+const iconWraps = document.querySelectorAll('.app-icon');
+iconWraps.forEach(w=>{
+  // click: open app (short press)
+  w.addEventListener('click', (ev)=>{
+    // 如果在编辑模式则进入编辑 dialog instead
+    if(isEditing && currentEditingKey===w.dataset.key){
+      openEditModal(w.dataset.key);
+      return;
+    }
+    // short click opens app
+    const mapping = {
+      chat: 'chat.html',
+      api: 'api.html',
+      style: 'style.html',
+      role: 'role.html',
+      memory: 'memory.html',
+      more: '#'
+    };
+    const key = w.dataset.key;
+    const page = mapping[key]||'#';
+    if(page!=='#') openApp(page);
+  });
+
+  // long-press detection
+  w.addEventListener('mousedown', onPressStart);
+  w.addEventListener('touchstart', onPressStart);
+  w.addEventListener('mouseup', onPressEnd);
+  w.addEventListener('mouseleave', onPressEnd);
+  w.addEventListener('touchend', onPressEnd);
+  w.addEventListener('touchcancel', onPressEnd);
+});
+
+// ---------- enter edit (icon shake) ----------
+let isEditing = false;
+let currentEditingKey = null;
+function enterIconEdit(wrap){
+  isEditing = true;
+  // add editing class to all icons
+  document.querySelectorAll('.app-icon').forEach(el=>el.classList.add('editing'));
+  // store which icon was long-pressed
+  currentEditingKey = wrap.dataset.key;
+  // show small tip
+  document.getElementById('themeBtn').innerText = '完成';
+  document.getElementById('themeBtn').onclick = exitIconEdit;
+}
+
+// ---------- exit edit ----------
+function exitIconEdit(){
+  isEditing = false;
+  currentEditingKey = null;
+  document.querySelectorAll('.app-icon').forEach(el=>el.classList.remove('editing'));
+  document.getElementById('themeBtn').innerText = '🎨';
+  document.getElementById('themeBtn').onclick = openThemePicker;
+}
+
+// ---------- open edit modal for a given key ----------
+const modalOverlay = document.getElementById('modalOverlay');
+const modalPreview = document.getElementById('modalPreview');
+const modalFile = document.getElementById('modalFile');
+const modalUrl = document.getElementById('modalUrl');
+const modalSave = document.getElementById('modalSave');
+const modalCancel = document.getElementById('modalCancel');
+
+function openEditModal(key){
+  modalOverlay.style.display = 'flex';
+  const img = document.getElementById('icon_'+key);
+  modalPreview.src = img ? img.src : '';
+  modalOverlay.dataset.key = key;
+}
+
+// close modal
+modalCancel.addEventListener('click', ()=>{ modalOverlay.style.display='none'; modalFile.value=''; modalUrl.value=''; });
+
+// handle save
+modalSave.addEventListener('click', ()=>{
+  const key = modalOverlay.dataset.key;
+  // priority: file upload > url
+  const file = modalFile.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const url = e.target.result;
+      localStorage.setItem('icon_'+key, url);
+      document.getElementById('icon_'+key).src = url;
+      modalOverlay.style.display='none';
+      modalFile.value=''; modalUrl.value='';
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+  const url = modalUrl.value.trim();
+  if(url){
+    // save url directly
+    localStorage.setItem('icon_'+key, url);
+    document.getElementById('icon_'+key).src = url;
+    modalOverlay.style.display='none';
+    modalUrl.value='';
+    return;
+  }
+  alert('请选择图片或输入图片链接');
+});
+
+// ---------- wallpaper change: long-press on empty area ----------
+let gridPressTimer = null;
+function gridPressStart(e){
+  // only when not on icon
+  if(e.target.closest('.app-icon')) return;
+  gridPressTimer = setTimeout(()=>{ openWallpaperModal(); }, LONGPRESS_MS);
+}
+function gridPressEnd(e){
+  clearTimeout(gridPressTimer); gridPressTimer = null;
+}
+
+const homeGrid = document.getElementById('homeGrid');
+homeGrid.addEventListener('mousedown', gridPressStart);
+homeGrid.addEventListener('touchstart', gridPressStart);
+homeGrid.addEventListener('mouseup', gridPressEnd);
+homeGrid.addEventListener('mouseleave', gridPressEnd);
+homeGrid.addEventListener('touchend', gridPressEnd);
+homeGrid.addEventListener('touchcancel', gridPressEnd);
+
+// ---------- wallpaper modal (reuse same modal but different mode) ----------
+let wallpaperMode = false;
+function openWallpaperModal(){
+  wallpaperMode = true;
+  modalOverlay.style.display='flex';
+  document.getElementById('modalTitle').innerText = '更换壁纸';
+  modalPreview.src = localStorage.getItem('home_wallpaper') || '';
+  modalFile.value=''; modalUrl.value='';
+  // hide url/file labels not necessary, we reuse modal
+} 
+// ---------- when saving in modal, if wallpaperMode is true, save wallpaper instead ----------
+modalSave.addEventListener('click', ()=>{
+  if(!modalOverlay.dataset.key && wallpaperMode){
+    // wallpaper saving
+    const file = modalFile.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const url = e.target.result;
+        localStorage.setItem('home_wallpaper', url);
+        document.getElementById('phone').style.backgroundImage = `url('${url}')`;
+        modalOverlay.style.display='none';
+        wallpaperMode = false;
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+    const url = modalUrl.value.trim();
+    if(url){
+      localStorage.setItem('home_wallpaper', url);
+      document.getElementById('phone').style.backgroundImage = `url('${url}')`;
+      modalOverlay.style.display='none';
+      wallpaperMode = false;
+      return;
+    }
+    alert('请选择图片或输入图片链接');
+    return;
+  }
+});
+
+// when modal closed (either cancel or saved), reset modalTitle and wallpaperMode
+modalCancel.addEventListener('click', ()=>{
+  document.getElementById('modalTitle').innerText = '编辑图标';
+  wallpaperMode = false;
+});
+
+modalOverlay.addEventListener('click', (e)=>{
+  if(e.target === modalOverlay){
+    modalOverlay.style.display='none';
+    wallpaperMode = false;
+    modalFile.value=''; modalUrl.value='';
+    document.getElementById('modalTitle').innerText = '编辑图标';
+  }
+});
+
+// ---------- theme picker ----------
+function openThemePicker(){
+  // simple prompt for now - you can build a nicer UI later
+  const t = prompt('选择主题: default / dark / pink', localStorage.getItem('home_theme') || 'default');
+  if(!t) return;
+  setTheme(t);
+}
+document.getElementById('themeBtn').addEventListener('click', openThemePicker);
+
+function setTheme(mode){
+  localStorage.setItem('home_theme', mode);
+  if(mode === 'dark'){
+    document.documentElement.style.setProperty('--bg-color','#0f1720');
+    document.documentElement.style.setProperty('--status-bg','#0b1220');
+    document.documentElement.style.setProperty('--text-color','#eee');
+    document.documentElement.style.setProperty('--accent','#27ae60');
+  } else if(mode === 'pink'){
+    document.documentElement.style.setProperty('--bg-color','#ffeef4');
+    document.documentElement.style.setProperty('--status-bg','#ffdfe9');
+    document.documentElement.style.setProperty('--text-color','#5a2130');
+    document.documentElement.style.setProperty('--accent','#ff6b9a');
+  } else {
+    // default
+    document.documentElement.style.setProperty('--bg-color','#dfe4ea');
+    document.documentElement.style.setProperty('--status-bg','#f1f2f6');
+    document.documentElement.style.setProperty('--text-color','#333');
+    document.documentElement.style.setProperty('--accent','#07c160');
+  }
+}
+
+// ---------- load theme and finalize ----------
+(function init(){
+  const theme = localStorage.getItem('home_theme') || 'default';
+  setTheme(theme);
+  applySavedSettings();
+  // bind enter edit by double-tap fallback
+  document.addEventListener('dblclick', ()=>{ if(!isEditing) enterIconEdit(document.querySelector('.app-icon')); });
+})();
+</script>
+
+</body>
+</html>  
