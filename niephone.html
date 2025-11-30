@@ -5,9 +5,13 @@
 <title>niephone</title>
 <style>
 body { margin:0; background:#f5f5f5; font-family:Arial,sans-serif;}
-.phone { width:380px; height:700px; background:white; margin:20px auto; border-radius:25px; box-shadow:0 0 20px rgba(0,0,0,0.2); display:flex; flex-direction:column; overflow:hidden;}
-.header {background:#07c160; padding:12px; color:white; text-align:center; font-size:20px; position:relative;}
-.settings-btn { position:absolute; right:15px; top:10px; background:white; color:#07c160; font-size:14px; padding:3px 8px; border-radius:10px; cursor:pointer; border:none; }
+.phone { width:380px; height:700px; background:white; margin:20px auto; 
+    border-radius:25px; box-shadow:0 0 20px rgba(0,0,0,0.2); 
+    display:flex; flex-direction:column; overflow:hidden;}
+.header {background:#07c160; padding:12px; color:white; text-align:center; 
+    font-size:20px; position:relative;}
+.settings-btn { position:absolute; right:15px; top:10px; background:white; 
+    color:#07c160; font-size:14px; padding:3px 8px; border-radius:10px; cursor:pointer; border:none; }
 .chat-box {flex:1; padding:10px; overflow-y:auto;}
 .msg {max-width:70%; padding:10px 14px; border-radius:10px; margin:8px 0; line-height:1.4;}
 .me {background:#95ec69; margin-left:auto;}
@@ -16,7 +20,6 @@ body { margin:0; background:#f5f5f5; font-family:Arial,sans-serif;}
 input {flex:1; padding:10px; border-radius:20px; border:1px solid #ccc; outline:none;}
 button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; background:#07c160; color:white; cursor:pointer;}
 
-/* 设置面板 */
 .settings-panel {
     position:absolute;
     top:0; left:0; right:0; bottom:0;
@@ -29,7 +32,7 @@ button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; ba
     padding:20px;
     border-radius:15px;
 }
-.panel-box input {
+.panel-box input, .panel-box select {
     width:100%; margin:10px 0;
     padding:10px; border-radius:10px; border:1px solid #ccc;
 }
@@ -39,24 +42,27 @@ button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; ba
 <body>
 <div class="phone">
 
-    <!-- 顶部 -->
     <div class="header">
         niephone
         <button class="settings-btn" onclick="openSettings()">⚙ 设置</button>
     </div>
 
-    <!-- 设置面板 -->
     <div class="settings-panel" id="settingsPanel">
         <div class="panel-box">
             <h3>API 设置</h3>
-            <input id="apiUrl" placeholder="API 网站 URL，例如：https://api.openai.com/v1/responses">
+
+            <input id="apiUrl" placeholder="API 地址，例如：https://api.openai.com/v1/responses">
             <input id="apiKey" placeholder="API Key（sk-开头）">
+
+            <label>选择模型：</label>
+            <select id="modelSelect">
+                <option>加载中…</option>
+            </select>
             <button onclick="saveSettings()">保存</button>
             <button style="margin-left:10px;background:#ccc;color:black;" onclick="closeSettings()">取消</button>
         </div>
     </div>
 
-    <!-- 聊天区 -->
     <div class="chat-box" id="chat"></div>
 
     <div class="input-area">
@@ -68,12 +74,19 @@ button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; ba
 <script>
 let apiKey = localStorage.getItem("nie_api_key") || "";
 let apiUrl = localStorage.getItem("nie_api_url") || "";
+let modelName = localStorage.getItem("nie_model") || "";
 
-// 打开设置
+// 打开设置面板
 function openSettings() {
     document.getElementById("settingsPanel").style.display = "flex";
+
     document.getElementById("apiKey").value = apiKey;
     document.getElementById("apiUrl").value = apiUrl;
+
+    // 如果有 API 信息 → 自动加载模型
+    if(apiKey && apiUrl){
+        loadModels();
+    }
 }
 
 // 关闭设置
@@ -85,23 +98,64 @@ function closeSettings() {
 function saveSettings() {
     apiKey = document.getElementById("apiKey").value.trim();
     apiUrl = document.getElementById("apiUrl").value.trim();
+    modelName = document.getElementById("modelSelect").value;
 
-    if(!apiKey || !apiUrl){
-        alert("请填写 API URL 和 API Key！");
+    if(!apiKey || !apiUrl || !modelName){
+        alert("请填写 API URL、API Key，并选择模型！");
         return;
     }
 
     localStorage.setItem("nie_api_key", apiKey);
     localStorage.setItem("nie_api_url", apiUrl);
+    localStorage.setItem("nie_model", modelName);
 
     alert("保存成功！");
     closeSettings();
 }
+   // 从 API 加载模型列表
+async function loadModels() {
+    let modelSelect = document.getElementById("modelSelect");
+    modelSelect.innerHTML = "<option>加载中…</option>";
+
+    try {
+        // 兼容两种 API：/models 或 /v1/models
+        let modelsUrl = apiUrl.replace("/responses", "/models");
+        if (!modelsUrl.endsWith("/models")) modelsUrl += "/models";
+
+        let res = await fetch(modelsUrl, {
+            headers: { "Authorization": "Bearer " + apiKey }
+        });
+
+        let data = await res.json();
+        modelSelect.innerHTML = "";
+
+        // 兼容不同 API 返回格式
+        let list = data.data || data.models || [];
+
+        list.forEach(m => {
+            let name = m.id || m.model || "";
+            if(name){
+                let op = document.createElement("option");
+                op.value = name;
+                op.textContent = name;
+                modelSelect.appendChild(op);
+            }
+        });
+
+        // 如果之前保存过模型 → 自动选中
+        if(modelName){
+            modelSelect.value = modelName;
+        }
+
+    } catch(err) {
+        modelSelect.innerHTML = "<option>加载失败</option>";
+    }
+}
 
 // 发送消息
 async function sendMsg() {
-    if(!apiKey || !apiUrl){
-        alert("请先进入设置填写 API 信息！");
+    if(!apiKey || !apiUrl || !modelName){
+        alert("请先进入设置填写 API 信息和模型！");
         return;
     }
 
@@ -132,7 +186,7 @@ async function sendMsg() {
                 "Authorization": "Bearer " + apiKey
             },
             body: JSON.stringify({
-                model: "gpt-4o-mini",
+                model: modelName,
                 messages: [
                     { role: "user", content: text }
                 ]
@@ -142,6 +196,7 @@ async function sendMsg() {
         let data = await response.json();
         let reply = data.choices?.[0]?.message?.content || "（AI 没有返回内容）";
         aiMsg.innerText = reply;
+
     } catch (err) {
         aiMsg.innerText = "⚠️ AI 调用失败：" + err.message;
     }
@@ -149,5 +204,6 @@ async function sendMsg() {
     chat.scrollTop = chat.scrollHeight;
 }
 </script>
+
 </body>
-</html>
+</html> 
