@@ -125,13 +125,14 @@ body {
 
 /* 设置面板 */
 .settings-panel {
-    position:absolute;
-    top:0; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,0.45);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    backdrop-filter:blur(5px);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;           /* 默认隐藏 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;           /* 确保在最上层显示时在顶层 */
+    pointer-events: auto;    /* 允许点击（隐藏时 display:none 就不会拦截） */
 }
 
 .panel-box {
@@ -552,6 +553,7 @@ function setAvatarAi(event) {
     };
     reader.readAsDataURL(file);
 }
+            
 </script>
 </body>
 </html>
