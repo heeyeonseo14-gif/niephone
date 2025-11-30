@@ -3,272 +3,372 @@
 <head>
 <meta charset="utf-8" />
 <title>niephone</title>
+
 <style>
-body { margin:0; background:#f5f5f5; font-family:Arial,sans-serif;}
-.phone { width:380px; height:700px; background:white; margin:20px auto; 
-    border-radius:25px; box-shadow:0 0 20px rgba(0,0,0,0.2); 
-    display:flex; flex-direction:column; overflow:hidden;}
-.header {background:#07c160; padding:12px; color:white; text-align:center; 
-    font-size:20px; position:relative;}
-.settings-btn { position:absolute; right:15px; top:10px; background:white; 
-    color:#07c160; font-size:14px; padding:3px 8px; border-radius:10px; cursor:pointer; border:none; }
-.chat-box {flex:1; padding:10px; overflow-y:auto;}
-.msg {max-width:70%; padding:10px 14px; border-radius:10px; margin:8px 0; line-height:1.4;}
-.me {background:#95ec69; margin-left:auto;}
-.ai {background:#e5e5e5; margin-right:auto;}
-.input-area {display:flex; padding:10px; border-top:1px solid #ddd;}
-input {flex:1; padding:10px; border-radius:20px; border:1px solid #ccc; outline:none;}
-button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; background:#07c160; color:white; cursor:pointer;}
+body {
+    margin:0;
+    background:#f5f5f5;
+    font-family:Arial;
+    display:flex;
+    justify-content:center;
+    padding-top:20px;
+}
+
+.phone {
+    width:380px;
+    height:700px;
+    background:white;
+    border-radius:25px;
+    box-shadow:0 0 15px rgba(0,0,0,0.2);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.header {
+    background:#07c160;
+    padding:12px;
+    font-size:20px;
+    color:white;
+    position:relative;
+    text-align:center;
+}
+
+.settings-btn {
+    position:absolute;
+    right:15px;
+    top:12px;
+    color:white;
+    background:none;
+    border:none;
+    font-size:16px;
+}
+
+.chat-box {
+    flex:1;
+    padding:10px;
+    overflow-y:auto;
+}
+
+.msg {
+    max-width:75%;
+    padding:10px 14px;
+    border-radius:12px;
+    margin:8px 0;
+    word-break:break-word;
+}
+
+.me {
+    background:#95ec69;
+    margin-left:auto;
+}
+
+.ai {
+    background:#e5e5e5;
+    margin-right:auto;
+}
+
+.input-area {
+    display:flex;
+    padding:10px;
+    border-top:1px solid #ddd;
+}
+
+input {
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+button {
+    margin-left:10px;
+    padding:10px 15px;
+    border:none;
+    background:#07c160;
+    color:white;
+    border-radius:10px;
+}
 
 .settings-panel {
     position:absolute;
     top:0; left:0; right:0; bottom:0;
     background:rgba(0,0,0,0.5);
-    display:none; justify-content:center; align-items:center;
+    display:none;
+    justify-content:center;
+    align-items:center;
 }
+
 .panel-box {
     background:white;
     width:80%;
     padding:20px;
     border-radius:15px;
 }
+
 .panel-box input, .panel-box select {
-    width:100%; margin:10px 0;
-    padding:10px; border-radius:10px; border:1px solid #ccc;
+    width:100%;
+    margin:10px 0;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
 }
 </style>
 </head>
 
 <body>
-<div class="phone">
+    <div class="phone">
 
     <div class="header">
         niephone
-        <button class="settings-btn" onclick="openSettings()">⚙ 设置</button>
+        <button class="settings-btn" onclick="openSettings()">⚙</button>
     </div>
 
+    <!-- 设置面板 -->
     <div class="settings-panel" id="settingsPanel">
         <div class="panel-box">
             <h3>API 设置</h3>
 
-            <input id="apiUrl" placeholder="API 地址，例如：https://api.openai.com/v1/responses">
-            <input id="apiKey" placeholder="API Key（sk-开头）">
+            <input id="apiUrl" placeholder="API 地址，如 https://api521.pro/v1" />
+            <input id="apiKey" placeholder="API Key" />
 
             <label>选择模型：</label>
             <select id="modelSelect">
                 <option>加载中…</option>
             </select>
+
             <button onclick="saveSettings()">保存</button>
-            <button style="margin-left:10px;background:#ccc;color:black;" onclick="closeSettings()">取消</button>
+            <button style="margin-left:10px;background:#999;" onclick="closeSettings()">关闭</button>
         </div>
     </div>
 
+    <!-- 聊天内容 -->
     <div class="chat-box" id="chat"></div>
 
+    <!-- 输入区 -->
     <div class="input-area">
-        <input id="msgInput" placeholder="输入消息..." />
+        <input id="msgInput" placeholder="输入消息…" />
         <button onclick="sendMsg()">发送</button>
     </div>
+
 </div>
 
 <script>
 let apiKey = localStorage.getItem("nie_api_key") || "";
 let apiUrl = localStorage.getItem("nie_api_url") || "";
 let modelName = localStorage.getItem("nie_model") || "";
-
-// 打开设置面板
+    // 打开设置面板
 function openSettings() {
-    document.getElementById("settingsPanel").style.display = "flex";
-
-    document.getElementById("apiKey").value = apiKey;
-    document.getElementById("apiUrl").value = apiUrl;
-
-    // 如果有 API 信息 → 自动加载模型
-    if(apiKey && apiUrl){
-        loadModels();
-    }
+  document.getElementById("settingsPanel").style.display = "flex";
+  document.getElementById("apiKey").value = apiKey || "";
+  // 如果你想强制显示固定的基础地址（只呈现 https://api521.pro/v1），可以把下一行改为固定值：
+  // document.getElementById("apiUrl").value = "https://api521.pro/v1";
+  document.getElementById("apiUrl").value = apiUrl || "";
+  // 如果之前有保存的模型名则设置下拉选中（可能为空）
+  if (modelName) {
+    // 等待 loadModels 完成会自动选中
+  }
+  // 如果填写了 API 信息，自动拉取模型列表
+  if (apiKey && apiUrl) {
+    loadModels();
+  }
 }
 
-// 关闭设置
+// 关闭设置面板
 function closeSettings() {
-    document.getElementById("settingsPanel").style.display = "none";
+  document.getElementById("settingsPanel").style.display = "none";
 }
 
-// 保存设置
+// 保存设置（写 localStorage）
 function saveSettings() {
-    apiKey = document.getElementById("apiKey").value.trim();
-    apiUrl = document.getElementById("apiUrl").value.trim();
-    modelName = document.getElementById("modelSelect").value;
+  let inKey = document.getElementById("apiKey").value.trim();
+  let inUrl = document.getElementById("apiUrl").value.trim();
+  let sel = document.getElementById("modelSelect");
+  let inModel = sel ? (sel.value || "") : "";
 
-    if(!apiKey || !apiUrl || !modelName){
-        alert("请填写 API URL、API Key，并选择模型！");
-        return;
-    }
+  // 如果你强制想要 apiUrl 一直是 https://api521.pro/v1，可以在这里覆盖：
+  // inUrl = "https://api521.pro/v1";
 
-    localStorage.setItem("nie_api_key", apiKey);
-    localStorage.setItem("nie_api_url", apiUrl);
-    localStorage.setItem("nie_model", modelName);
+  if (!inKey || !inUrl) {
+    alert("请填写 API URL 和 API Key");
+    return;
+  }
 
-    alert("保存成功！");
-    closeSettings();
+  apiKey = inKey;
+  apiUrl = inUrl;
+  modelName = inModel;
+
+  localStorage.setItem("nie_api_key", apiKey);
+  localStorage.setItem("nie_api_url", apiUrl);
+  localStorage.setItem("nie_model", modelName);
+
+  alert("保存成功！");
+  closeSettings();
+  // 保存后尝试加载模型（如果需要）
+  if (apiKey && apiUrl) loadModels();
 }
-   // 从 API 加载模型列表
+
+// 从 API 加载模型列表（兼容多种返回格式）
 async function loadModels() {
-    let modelSelect = document.getElementById("modelSelect");
-    modelSelect.innerHTML = "<option>加载中…</option>";
+  let modelSelect = document.getElementById("modelSelect");
+  if (!modelSelect) return;
+  modelSelect.innerHTML = "<option>加载中…</option>";
 
-    try {
-        // 自动拼接成 /v1/models
-        let modelsUrl = apiUrl.replace(/\/$/, "");  
-        modelsUrl += "/models"; 
-
-        let res = await fetch(modelsUrl, {
-            headers: {
-                "Authorization": `Bearer ${apiKey}`
-            }
-        });
-
-        let data = await res.json();
-        modelSelect.innerHTML = "";
-        
-        // 兼容不同 API 返回格式
-        let list = data.data || data.models || data;
-
-        list.forEach(m => {
-            let name = m.id || m.model;
-            if(name){
-                let op = document.createElement("option");
-                op.value = name;
-                op.textContent = name;
-                modelSelect.appendChild(op);
-            }
-        });
-
-        if (modelName) {
-            modelSelect.value = modelName;
-        }
-
-    } catch (err) {
-        modelSelect.innerHTML = "<option>加载失败</option>";
+  try {
+    // 将用户输入的基础地址拼接成 /v1/models（兼容用户填 /v1 或 /v1/ 或直接 /models）
+    let modelsUrl = apiUrl || "";
+    // 强制去掉末尾斜杠
+    modelsUrl = modelsUrl.replace(/\/+$/, "");
+    // 如果用户直接输入了 /models 或 /v1/models 就不重复添加
+    if (!modelsUrl.endsWith("/models")) {
+      // 如果用户只填了 /v1，则加 /models；如果填的是根域名也加 /v1/models 视情况而定
+      // 这里用比较保守的策略：优先尝试 /models（适配很多代理），如果接口要求 /v1/models，请把 apiUrl 改为包含 /v1
+      modelsUrl = modelsUrl + "/models";
     }
-}
-        // 兼容不同 API 返回格式
-        let list = data.data || data.models || [];
 
-        list.forEach(m => {
-            let name = m.id || m.model || "";
-            if(name){
-                let op = document.createElement("option");
-                op.value = name;
-                op.textContent = name;
-                modelSelect.appendChild(op);
-            }
-        });
+    const res = await fetch(modelsUrl, {
+      headers: {
+        "Authorization": `Bearer ${apiKey}`
+      }
+    });
+    const data = await res.json();
 
-        // 如果之前保存过模型 → 自动选中
-        if(modelName){
-            modelSelect.value = modelName;
-        }
+    // 清空
+    modelSelect.innerHTML = "";
 
-    } catch(err) {
-        modelSelect.innerHTML = "<option>加载失败</option>";
+    // 兼容不同格式：data.data / data.models / data.model / data
+    let list = data.data || data.models || data.model || data;
+
+    // 如果返回是对象且里面有 models 字段再取一次
+    if (!Array.isArray(list) && typeof list === "object") {
+      // 可能像 {models: [...]}
+      list = list.models || list.list || Object.values(list);
     }
-}
 
-// 发送消息
+    if (!Array.isArray(list) || list.length === 0) {
+      // 没拿到列表，尝试用另一种常见字段（兼容某些代理）
+      modelSelect.innerHTML = "<option>无法读取模型列表</option>";
+      return;
+    }
+
+    list.forEach(m => {
+      // 有些返回项直接是字符串，有些是对象
+      let name = "";
+      if (typeof m === "string") name = m;
+      else name = m.id || m.model || m.name || (m.modelId || "");
+      if (name) {
+        let op = document.createElement("option");
+        op.value = name;
+        op.textContent = name;
+        modelSelect.appendChild(op);
+      }
+    });
+
+    // 如果之前保存过 modelName，试着选中
+    if (modelName) {
+      try { modelSelect.value = modelName; } catch(e) {}
+    }
+  } catch (err) {
+    modelSelect.innerHTML = "<option>加载模型失败</option>";
+    console.error("loadModels error:", err);
+  }
+}
+    // 发送消息到 API
 async function sendMsg() {
-    if(!apiKey || !apiUrl || !modelName){
-        alert("请先进入设置填写 API 信息和模型！");
-        return;
-    }
-
-    let input = document.getElementById("msgInput");
-    let chat = document.getElementById("chat");
-    let text = input.value.trim();
+    let text = document.getElementById("msgInput").value.trim();
     if (!text) return;
 
-    let userMsg = document.createElement("div");
-    userMsg.className = "msg me";
-    userMsg.innerText = text;
-    chat.appendChild(userMsg);
+    // 显示自己的消息
+    let chat = document.getElementById("chat");
+    let msgDiv = document.createElement("div");
+    msgDiv.className = "msg me";
+    msgDiv.innerText = text;
+    chat.appendChild(msgDiv);
 
-    input.value = "";
+    document.getElementById("msgInput").value = "";
     chat.scrollTop = chat.scrollHeight;
 
+    // 检查 API 配置
+    if (!apiKey || !apiUrl || !modelName) {
+        let warn = document.createElement("div");
+        warn.className = "msg ai";
+        warn.innerText = "请先进入设置填写 API URL、API Key 与模型。";
+        chat.appendChild(warn);
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
+
+    // 显示 AI 正在思考…
     let aiMsg = document.createElement("div");
     aiMsg.className = "msg ai";
-    aiMsg.innerText = "正在思考…";
+    aiMsg.innerText = "……";
     chat.appendChild(aiMsg);
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        // 自动拼接 chat 接口
-let chatUrl = apiUrl;
+        // 自动拼接聊天接口：响应式 AI 多为 /responses
+        let chatUrl = apiUrl.replace(/\/+$/, ""); // 去掉末尾 /
+        if (!chatUrl.endsWith("/responses") && !chatUrl.endsWith("/chat/completions")) {
+            chatUrl += "/responses";
+        }
 
-// 如果用户只填了基础路径，例如 https://api521.pro/v1
-if (!apiUrl.endsWith("/responses") && !apiUrl.endsWith("/chat/completions")) {
-    // 默认自动使用 responses（API521 最常用）
-    chatUrl = apiUrl.replace(/\/$/, "") + "/responses";
-}
+        // 请求 API521 格式：使用 input 字段
+        let res = await fetch(chatUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: modelName,
+                input: text
+            })
+        });
 
-const response = await fetch(chatUrl, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-        model: modelName,
-        input: text   // API521 的 responses 需要 input 字段
-    })
-});
+        let data = await res.json();
 
-        let data = await response.json();
+        // 尝试解析多种可能返回格式
+        let reply = "";
 
-// 尝试多种常见返回格式
-let reply = "";
+        // OpenAI 格式的新返回
+        if (data.output_text) reply = data.output_text;
 
-// 1) OpenAI 风格： data.choices[0].message.content
-if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-    reply = data.choices[0].message.content;
-}
-// 2) 某些代理： data.choices[0].text
-else if (data.choices && data.choices[0] && data.choices[0].text) {
-    reply = data.choices[0].text;
-}
-// 3) 新版 responses 风格： data.output_text 或 data.output[0].content[0].text
-else if (data.output_text) {
-    reply = data.output_text;
-} 
-else if (data.output && data.output[0] && data.output[0].content && data.output[0].content[0] && data.output[0].content[0].text) {
-    reply = data.output[0].content[0].text;
-}
-// 4) 一些代理自定义字段： data.reply / data.result
-else if (data.reply) {
-    reply = data.reply;
-}
-else if (data.result) {
-    reply = (typeof data.result === "string") ? data.result : JSON.stringify(data.result);
-}
+        // 某些代理：data.reply
+        else if (data.reply) reply = data.reply;
 
-// 5) 万能兜底：把整个 JSON 展示（便于调试）
-if (!reply) {
-    try {
-        reply = JSON.stringify(data).slice(0, 2000);
-    } catch(e) {
-        reply = "(AI 没有返回内容)";
+        // Choices 风格：text
+        else if (data.choices && data.choices[0] && data.choices[0].text)
+            reply = data.choices[0].text;
+
+        // Choices 风格：message.content
+        else if (
+            data.choices && data.choices[0] &&
+            data.choices[0].message && data.choices[0].message.content
+        )
+            reply = data.choices[0].message.content;
+
+        // output 数组结构
+        else if (
+            data.output &&
+            data.output[0] &&
+            data.output[0].content &&
+            data.output[0].content[0] &&
+            data.output[0].content[0].text
+        )
+            reply = data.output[0].content[0].text;
+
+        // 其他未知格式 → 打印 JSON
+        else reply = JSON.stringify(data).slice(0, 1500);
+
+        aiMsg.innerText = reply;
     }
-}
-
-aiMsg.innerText = reply;
-
-    } catch (err) {
-        aiMsg.innerText = "⚠️ AI 调用失败：" + err.message;
+    catch (err) {
+        aiMsg.innerText = "请求失败：" + err;
     }
 
     chat.scrollTop = chat.scrollHeight;
 }
-</script>
 
+</script>
 </body>
-</html> 
+</html>
