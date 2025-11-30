@@ -278,6 +278,7 @@ async function loadModels() {
         console.error(err);
     }
 }
+    
 async function sendMsg() {
     let text = document.getElementById("msgInput").value;
     if (!text) return;
@@ -363,6 +364,7 @@ async function sendMsg() {
 
     chat.scrollTop = chat.scrollHeight;
 }
+    
 /*********** 外观：设置壁纸 ***********/
 function setWallpaper(event) {
     let file = event.target.files[0];
