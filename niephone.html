@@ -194,8 +194,43 @@ async function sendMsg() {
         });
 
         let data = await response.json();
-        let reply = data.choices?.[0]?.message?.content || "（AI 没有返回内容）";
-        aiMsg.innerText = reply;
+
+// 尝试多种常见返回格式
+let reply = "";
+
+// 1) OpenAI 风格： data.choices[0].message.content
+if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+    reply = data.choices[0].message.content;
+}
+// 2) 某些代理： data.choices[0].text
+else if (data.choices && data.choices[0] && data.choices[0].text) {
+    reply = data.choices[0].text;
+}
+// 3) 新版 responses 风格： data.output_text 或 data.output[0].content[0].text
+else if (data.output_text) {
+    reply = data.output_text;
+} 
+else if (data.output && data.output[0] && data.output[0].content && data.output[0].content[0] && data.output[0].content[0].text) {
+    reply = data.output[0].content[0].text;
+}
+// 4) 一些代理自定义字段： data.reply / data.result
+else if (data.reply) {
+    reply = data.reply;
+}
+else if (data.result) {
+    reply = (typeof data.result === "string") ? data.result : JSON.stringify(data.result);
+}
+
+// 5) 万能兜底：把整个 JSON 展示（便于调试）
+if (!reply) {
+    try {
+        reply = JSON.stringify(data).slice(0, 2000);
+    } catch(e) {
+        reply = "(AI 没有返回内容)";
+    }
+}
+
+aiMsg.innerText = reply;
 
     } catch (err) {
         aiMsg.innerText = "⚠️ AI 调用失败：" + err.message;
