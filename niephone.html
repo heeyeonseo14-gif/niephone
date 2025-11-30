@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>niephone</title>
+<style>
+body { margin:0; background:#f5f5f5; font-family:Arial,sans-serif;}
+.phone { width:380px; height:700px; background:white; margin:20px auto; border-radius:25px; box-shadow:0 0 20px rgba(0,0,0,0.2); display:flex; flex-direction:column; overflow:hidden;}
+.header {background:#07c160; padding:12px; color:white; text-align:center; font-size:20px;}
+.chat-box {flex:1; padding:10px; overflow-y:auto;}
+.msg {max-width:70%; padding:10px 14px; border-radius:10px; margin:8px 0; line-height:1.4;}
+.me {background:#95ec69; margin-left:auto;}
+.ai {background:#e5e5e5; margin-right:auto;}
+.input-area {display:flex; padding:10px; border-top:1px solid #ddd;}
+input {flex:1; padding:10px; border-radius:20px; border:1px solid #ccc; outline:none;}
+button {margin-left:10px; padding:10px 16px; border-radius:20px; border:none; background:#07c160; color:white; cursor:pointer;}
+.api-container {padding:10px; background:#fff; display:flex; align-items:center; gap:10px; border-bottom:1px solid #ddd;}
+.api-container input {flex:1;}
+</style>
+</head>
+
+<body>
+<div class="phone">
+    <div class="header">niephone</div>
+
+    <div class="api-container">
+        <input id="apiInput" type="text" placeholder="在这里输入你的 OpenAI API Key" />
+        <button onclick="setApiKey()">确认</button>
+    </div>
+
+    <div class="chat-box" id="chat"></div>
+
+    <div class="input-area">
+        <input id="msgInput" placeholder="输入消息..." />
+        <button onclick="sendMsg()">发送</button>
+    </div>
+</div>
+
+<script>
+let apiKey = "";
+
+function setApiKey() {
+    let input = document.getElementById("apiInput");
+    apiKey = input.value.trim();
+    if(apiKey){
+        alert("API Key 设置成功！现在可以开始聊天了。");
+        input.disabled = true;
+    } else {
+        alert("请输入有效的 API Key！");
+    }
+}
+
+async function sendMsg() {
+    if(!apiKey){
+        alert("请先输入你的 API Key！");
+        return;
+    }
+
+    let input = document.getElementById("msgInput");
+    let chat = document.getElementById("chat");
+    let text = input.value.trim();
+    if (!text) return;
+
+    let userMsg = document.createElement("div");
+    userMsg.className = "msg me";
+    userMsg.innerText = text;
+    chat.appendChild(userMsg);
+
+    input.value = "";
+    chat.scrollTop = chat.scrollHeight;
+
+    let aiMsg = document.createElement("div");
+    aiMsg.className = "msg ai";
+    aiMsg.innerText = "正在思考…";
+    chat.appendChild(aiMsg);
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+        let response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + apiKey
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "你是一个温柔可爱的AI小手机助手。" },
+                    { role: "user", content: text }
+                ]
+            })
+        });
+
+        let data = await response.json();
+        let reply = data.choices?.[0]?.message?.content || "（AI 没有返回内容）";
+        aiMsg.innerText = reply;
+    } catch (err) {
+        aiMsg.innerText = "⚠️ AI 调用失败：" + err.message;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+}
+</script>
+</body>
+</html>
