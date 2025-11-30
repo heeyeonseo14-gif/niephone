@@ -278,64 +278,69 @@ async function loadModels() {
         console.error(err);
     }
 }
-// 发送消息到 API
 async function sendMsg() {
-    let text = document.getElementById("msgInput").value.trim();
+    let text = document.getElementById("msgInput").value;
     if (!text) return;
 
     let chat = document.getElementById("chat");
 
-    // 显示自己的消息（带头像）
+    // 用户消息
     let rowMe = document.createElement("div");
     rowMe.className = "msg-row";
+    rowMe.style.justifyContent = "flex-end";
 
-    let bubbleMe = document.createElement("div");
-    bubbleMe.className = "msg me";
-    bubbleMe.innerText = text;
+    let meBubble = document.createElement("div");
+    meBubble.className = "msg me";
+    meBubble.innerText = text;
 
     let imgMe = document.createElement("img");
     imgMe.className = "avatar-me";
-    imgMe.src = avatarMe || "";
+    imgMe.src = localStorage.getItem("nie_avatar_me") ||
+                "https://i.imgur.com/4ZQZ4fP.png";
 
-    // 右侧排列：消息在左，头像在右
-    rowMe.appendChild(bubbleMe);
+    rowMe.appendChild(meBubble);
     rowMe.appendChild(imgMe);
     chat.appendChild(rowMe);
 
     document.getElementById("msgInput").value = "";
     chat.scrollTop = chat.scrollHeight;
 
-    // 检查 API 设置
+    // 没设置 API 时提示
     if (!apiKey || !apiUrl || !modelName) {
         let warn = document.createElement("div");
         warn.className = "msg ai";
-        warn.innerText = "⚠ 请先进入设置填写 API 信息";
+        warn.innerText = "⚠ 请先进入设置配置 API";
         chat.appendChild(warn);
+        chat.scrollTop = chat.scrollHeight;
         return;
     }
 
-    // AI 思考中提示
+    // AI 正在思考
     let rowAi = document.createElement("div");
     rowAi.className = "msg-row";
 
     let imgAi = document.createElement("img");
     imgAi.className = "avatar-ai";
-    imgAi.src = avatarAi || "";
+    imgAi.src = localStorage.getItem("nie_avatar_ai") ||
+                "https://i.imgur.com/Z7AzH2z.png";
 
-    let bubbleAi = document.createElement("div");
-    bubbleAi.className = "msg ai";
-    bubbleAi.innerText = "……";
+    let aiBubble = document.createElement("div");
+    aiBubble.className = "msg ai";
+    aiBubble.innerText = "……";
 
     rowAi.appendChild(imgAi);
-    rowAi.appendChild(bubbleAi);
+    rowAi.appendChild(aiBubble);
     chat.appendChild(rowAi);
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        // 自动拼接 /v1/chat/completions
-        let url = apiUrl.replace(/\/$/, "") + "/v1/chat/completions";
+        // 自动拼接 /v1/chat/completions 接口
+        let chatUrl = apiUrl.replace(/\/$/, "");
+        if (!chatUrl.includes("/chat/completions")) {
+            chatUrl += "/v1/chat/completions";
+        }
 
-        let res = await fetch(url, {
+        let res = await fetch(chatUrl, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${apiKey}`,
@@ -348,16 +353,16 @@ async function sendMsg() {
         });
 
         let data = await res.json();
-        let reply = data?.choices?.[0]?.message?.content || "(AI 无响应)";
-
-        bubbleAi.innerText = reply;
-        chat.scrollTop = chat.scrollHeight;
+        let reply = data.choices?.[0]?.message?.content || "(AI 无回复)";
+        aiBubble.innerText = reply;
 
     } catch (err) {
-        bubbleAi.innerText = "⚠ 调用失败，请检查 API";
+        aiBubble.innerText = "⚠ AI 调用失败";
         console.error(err);
     }
-}  
+
+    chat.scrollTop = chat.scrollHeight;
+}
 /*********** 外观：设置壁纸 ***********/
 function setWallpaper(event) {
     let file = event.target.files[0];
