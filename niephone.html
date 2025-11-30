@@ -118,17 +118,40 @@ async function loadModels() {
     modelSelect.innerHTML = "<option>加载中…</option>";
 
     try {
-        // 兼容两种 API：/models 或 /v1/models
-        let modelsUrl = apiUrl.replace("/responses", "/models");
-        if (!modelsUrl.endsWith("/models")) modelsUrl += "/models";
+        // 自动拼接成 /v1/models
+        let modelsUrl = apiUrl.replace(/\/$/, "");  
+        modelsUrl += "/models"; 
 
         let res = await fetch(modelsUrl, {
-            headers: { "Authorization": "Bearer " + apiKey }
+            headers: {
+                "Authorization": `Bearer ${apiKey}`
+            }
         });
 
         let data = await res.json();
         modelSelect.innerHTML = "";
+        
+        // 兼容不同 API 返回格式
+        let list = data.data || data.models || data;
 
+        list.forEach(m => {
+            let name = m.id || m.model;
+            if(name){
+                let op = document.createElement("option");
+                op.value = name;
+                op.textContent = name;
+                modelSelect.appendChild(op);
+            }
+        });
+
+        if (modelName) {
+            modelSelect.value = modelName;
+        }
+
+    } catch (err) {
+        modelSelect.innerHTML = "<option>加载失败</option>";
+    }
+}
         // 兼容不同 API 返回格式
         let list = data.data || data.models || [];
 
