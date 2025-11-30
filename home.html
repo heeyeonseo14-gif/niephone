@@ -1,117 +1,102 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>niephone - Home</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>niephone 主屏幕</title>
 
 <style>
-  body{
-    margin:0;
-    background:#000;
-    color:#fff;
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-    overflow:hidden;
-  }
+body{
+  margin:0;
+  background:#000;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  color:white;
+}
 
-  /* 整个手机界面 */
-  .phone{
-    width:360px;
-    max-width:95%;
-    height:760px;
-    max-height:95vh;
-    margin:20px auto;
-    border-radius:22px;
-    overflow:hidden;
-    background:#000;
-    position:relative;
-  }
+/* 手机外框 */
+.phone{
+  width:360px;
+  height:780px;
+  margin:20px auto;
+  border-radius:22px;
+  overflow:hidden;
+  background:black;
+  position:relative;
+}
 
-  /* 壁纸 */
-  .wallpaper{
-    position:absolute;
-    inset:0;
-    background-size:cover;
-    background-position:center;
-    filter:brightness(0.85);
-    z-index:1;
-  }
+/* 壁纸 */
+.wallpaper{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  z-index:1;
+}
 
-  .overlay{
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,0.3);
-    z-index:2;
-  }
+.overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.25);
+  z-index:2;
+}
 
-  /* 内容层 */
-  .content{
-    position:relative;
-    z-index:3;
-    width:100%;
-    height:100%;
-    padding:20px;
-    box-sizing:border-box;
-  }
+/* 内容层 */
+.content{
+  position:relative;
+  z-index:3;
+  padding:20px;
+  box-sizing:border-box;
+  text-align:center;
+}
 
-  /* 顶部大图（长方形） */
-  .big-img{
-    width:100%;
-    height:160px;
-    border-radius:18px;
-    background:rgba(255,255,255,0.1);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    font-weight:600;
-    margin-bottom:30px;
-    overflow:hidden;
-  }
-  .big-img img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-  }
+/* 图标区域 */
+.grid{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  grid-row-gap:35px;
+  grid-column-gap:10px;
+}
 
-  /* 通用图标按钮 */
-  .btn{
-    width:130px;
-    height:90px;
-    border-radius:18px;
-    background:rgba(255,255,255,0.13);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-    margin-bottom:20px;
-    cursor:pointer;
-    backdrop-filter:blur(6px);
-  }
+/* 图标外框 */
+.icon-box{
+  width:90px;
+  height:90px;
+  margin:auto;
+  border-radius:20px;
+  background:rgba(255,255,255,0.12);
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  cursor:pointer;
+  backdrop-filter:blur(5px);
+}
 
-  /* 底部菜单 */
-  .bottom-row{
-    position:absolute;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90%;
-    display:flex;
-    justify-content:space-between;
-  }
+/* 图标图片 */
+.icon-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
 
-  .small-btn{
-    width:100px;
-    height:80px;
-    background:rgba(255,255,255,0.13);
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-    cursor:pointer;
-    backdrop-filter:blur(6px);
-  }
+/* 图标文字 */
+.icon-text{
+  margin-top:6px;
+  font-size:16px;
+}
+
+/* 底部说明 */
+.footer{
+  position:absolute;
+  bottom:20px;
+  left:0;
+  width:100%;
+  text-align:center;
+  color:white;
+  font-size:15px;
+}
 </style>
 </head>
 
@@ -123,106 +108,169 @@
 
   <div class="content">
 
-    <!-- 顶部大图 -->
-    <div class="big-img" id="bigImageBox">
-      <span id="bigImageText">自定义图片 *长方形*</span>
+    <div class="grid">
+      <!-- 聊天 -->
+      <div>
+        <div class="icon-box" data-key="icon_chat"><img id="img_chat"></div>
+        <div class="icon-text">聊天</div>
+      </div>
+
+      <!-- API 设置 -->
+      <div>
+        <div class="icon-box" data-key="icon_api"><img id="img_api"></div>
+        <div class="icon-text">API 设置</div>
+      </div>
+
+      <!-- 外观设置 -->
+      <div>
+        <div class="icon-box" data-key="icon_style"><img id="img_style"></div>
+        <div class="icon-text">外观设置</div>
+      </div>
+
+      <!-- 人设设置 -->
+      <div>
+        <div class="icon-box" data-key="icon_role"><img id="img_role"></div>
+        <div class="icon-text">人设设置</div>
+      </div>
+
+      <!-- 记忆管理 -->
+      <div>
+        <div class="icon-box" data-key="icon_memory"><img id="img_memory"></div>
+        <div class="icon-text">记忆管理</div>
+      </div>
+
+      <!-- 更多 -->
+      <div>
+        <div class="icon-box" data-key="icon_more"><img id="img_more"></div>
+        <div class="icon-text">更多</div>
+      </div>
     </div>
 
-    <!-- 右侧按钮 -->
-    <div style="position:absolute; right:20px; top:210px;">
-      <div class="btn" id="chatBtn">聊天</div>
-      <div class="btn" id="roleBtn">人设</div>
-    </div>
-
-    <!-- 底部功能栏 -->
-    <div class="bottom-row">
-      <div class="small-btn" id="apiBtn">API设置</div>
-      <div class="small-btn" id="memoryBtn">记忆</div>
-      <div class="small-btn" id="extraBtn">待加</div>
+    <div class="footer">
+      niephone<br>
+      长按图标可编辑；长按空白更换壁纸
     </div>
 
   </div>
 </div>
 <script>
-/* ===== 读取与保存 ===== */
-function save(key, value){
-  localStorage.setItem(key, value);
-}
-function load(key){
-  return localStorage.getItem(key) || "";
-}
+// 默认图标（如果用户还没设置就用这个）
+const defaultIcons = {
+  icon_chat: "https://i.imgur.com/YYxZqRN.png",
+  icon_api: "https://i.imgur.com/YYxZqRN.png",
+  icon_style: "https://i.imgur.com/YYxZqRN.png",
+  icon_role: "https://i.imgur.com/YYxZqRN.png",
+  icon_memory: "https://i.imgur.com/YYxZqRN.png",
+  icon_more: "https://i.imgur.com/YYxZqRN.png"
+};
 
-/* ===== 壁纸 ===== */
-const wall = document.getElementById("wall");
-const savedWall = load("home_wallpaper");
-if(savedWall) wall.style.backgroundImage = `url(${savedWall})`;
+// 读取图标
+function loadIcons() {
+  for (let key in defaultIcons) {
+    let img = document.getElementById("img_" + key.replace("icon_", ""));
+    let saved = localStorage.getItem(key);
+    img.src = saved || defaultIcons[key];
+  }
+}
+loadIcons();
 
-/* 点击壁纸切换 */
-wall.addEventListener("click", ()=>{
-  let url = prompt("输入壁纸 URL（留空恢复默认）");
-  if(url === null) return;
-  save("home_wallpaper", url);
-  wall.style.backgroundImage = url ? `url(${url})` : "";
+// 长按图标进入编辑
+let pressTimer;
+
+document.querySelectorAll(".icon-box").forEach(box => {
+  box.addEventListener("touchstart", e => {
+    pressTimer = setTimeout(() => editIcon(box.dataset.key), 500);
+  });
+  box.addEventListener("touchend", e => clearTimeout(pressTimer));
+  box.addEventListener("mousedown", e => {
+    pressTimer = setTimeout(() => editIcon(box.dataset.key), 500);
+  });
+  box.addEventListener("mouseup", e => clearTimeout(pressTimer));
 });
 
-/* ===== 顶部大图 ===== */
-
-const bigImageBox = document.getElementById("bigImageBox");
-const bigImageText = document.getElementById("bigImageText");
-let savedBigImg = load("home_bigimg");
-
-if(savedBigImg){
-  let img = document.createElement("img");
-  img.src = savedBigImg;
-  bigImageBox.innerHTML = "";
-  bigImageBox.appendChild(img);
-}
-
-/* 点击自定义大图 */
-bigImageBox.addEventListener("click", ()=>{
-
-  let type = prompt("输入 1=链接图片，2=上传本地图片","1");
-
-  if(type === "1"){
-    let url = prompt("输入图片 URL：");
-    if(!url) return;
-    save("home_bigimg", url);
-
-    let img = document.createElement("img");
-    img.src = url;
-    bigImageBox.innerHTML = "";
-    bigImageBox.appendChild(img);
-  }
-
-  if(type === "2"){
+// 编辑图标：弹窗选择 URL / 本地图片
+function editIcon(key) {
+  let choice = prompt("输入图片 URL\n（留空则选择本地图片）");
+  if (choice) {
+    localStorage.setItem(key, choice);
+    loadIcons();
+  } else {
+    // 本地图片选择
     let input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = ()=>{
-      let file = input.files[0];
+    input.onchange = function (e) {
+      let file = e.target.files[0];
       let reader = new FileReader();
-      reader.onload = (e)=>{
-        save("home_bigimg", e.target.result);
-
-        let img = document.createElement("img");
-        img.src = e.target.result;
-        bigImageBox.innerHTML = "";
-        bigImageBox.appendChild(img);
+      reader.onload = function (r) {
+        localStorage.setItem(key, r.target.result);
+        loadIcons();
       };
       reader.readAsDataURL(file);
     };
     input.click();
   }
-});
- /* ===== 按钮跳转 ===== */
-
-document.getElementById("chatBtn").onclick = ()=>location.href="chat.html";
-document.getElementById("roleBtn").onclick = ()=>location.href="role.html";
-document.getElementById("apiBtn").onclick  = ()=>location.href="api.html";
-document.getElementById("memoryBtn").onclick  = ()=>location.href="memory.html";
-document.getElementById("extraBtn").onclick  = ()=>alert("你可以在这里加别的功能页面");
-
-/* 结束 */
+}
 </script>
-</body>
-</html> 
+<div class="wallpaper-tip">
+    长按空白处更换壁纸
+</div>
+<script>
+// ---- 默认壁纸 ----
+const defaultWallpaper = "https://i.imgur.com/Pt0hG9l.jpeg";
+
+// ---- 加载壁纸 ----
+function loadWallpaper() {
+  const saved = localStorage.getItem("wallpaper");
+  document.body.style.backgroundImage = `url('${saved || defaultWallpaper}')`;
+  document.body.style.backgroundSize = "cover";
+  document.body.style.backgroundPosition = "center";
+}
+loadWallpaper();
+
+
+// ---- 长按空白处换壁纸 ----
+let wallpaperTimer;
+
+document.body.addEventListener("touchstart", e => {
+  // 只有点在空白区才触发，不在图标上
+  if (e.target.classList.contains("icon-box")) return;
+  wallpaperTimer = setTimeout(changeWallpaper, 600);
+});
+document.body.addEventListener("touchend", e => clearTimeout(wallpaperTimer));
+
+document.body.addEventListener("mousedown", e => {
+  if (e.target.classList.contains("icon-box")) return;
+  wallpaperTimer = setTimeout(changeWallpaper, 600);
+});
+document.body.addEventListener("mouseup", e => clearTimeout(wallpaperTimer));
+
+
+// ---- 壁纸更换函数（URL 或 本地图片）----
+function changeWallpaper() {
+  let url = prompt("输入壁纸 URL\n（留空则选择本地图片）");
+
+  if (url) {
+    localStorage.setItem("wallpaper", url);
+    loadWallpaper();
+  } else {
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = function (e) {
+      let file = e.target.files[0];
+      let reader = new FileReader();
+
+      reader.onload = function (r) {
+        localStorage.setItem("wallpaper", r.target.result);
+        loadWallpaper();
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
+  }
+}
+</script>
