@@ -273,17 +273,18 @@ async function loadModels() {
     console.error("loadModels error:", err);
   }
 }
-    // 发送消息到 API
+    // 发送消息到 API（新版，支持 /v1/chat/completions）
 async function sendMsg() {
     let text = document.getElementById("msgInput").value.trim();
     if (!text) return;
 
-    // 显示自己的消息
     let chat = document.getElementById("chat");
-    let msgDiv = document.createElement("div");
-    msgDiv.className = "msg me";
-    msgDiv.innerText = text;
-    chat.appendChild(msgDiv);
+
+    // 显示自己的消息
+    let userMsg = document.createElement("div");
+    userMsg.className = "msg me";
+    userMsg.innerText = text;
+    chat.appendChild(userMsg);
 
     document.getElementById("msgInput").value = "";
     chat.scrollTop = chat.scrollHeight;
@@ -292,28 +293,27 @@ async function sendMsg() {
     if (!apiKey || !apiUrl || !modelName) {
         let warn = document.createElement("div");
         warn.className = "msg ai";
-        warn.innerText = "请先进入设置填写 API URL、API Key 与模型。";
+        warn.innerText = "请先进入设置填写 API URL、API Key 和模型。";
         chat.appendChild(warn);
         chat.scrollTop = chat.scrollHeight;
         return;
     }
 
-    // 显示 AI 正在思考…
+    // AI 正在思考…
     let aiMsg = document.createElement("div");
     aiMsg.className = "msg ai";
-    aiMsg.innerText = "……";
+    aiMsg.innerText = "正在思考…";
     chat.appendChild(aiMsg);
     chat.scrollTop = chat.scrollHeight;
 
     try {
-        // 自动拼接聊天接口：响应式 AI 多为 /responses
+        // 自动补全聊天接口（API521 标准：/v1/chat/completions）
         let chatUrl = apiUrl.replace(/\/+$/, ""); // 去掉末尾 /
-        if (!chatUrl.endsWith("/responses") && !chatUrl.endsWith("/chat/completions")) {
-            chatUrl += "/responses";
+        if (!chatUrl.endsWith("/chat/completions")) {
+            chatUrl += "/chat/completions";
         }
 
-        // 请求 API521 格式：使用 input 字段
-        let res = await fetch(chatUrl, {
+        const res = await fetch(chatUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -321,54 +321,40 @@ async function sendMsg() {
             },
             body: JSON.stringify({
                 model: modelName,
-                input: text
+                messages: [
+                    { role: "user", content: text }
+                ]
             })
         });
 
-        let data = await res.json();
+        const data = await res.json();
+        console.log("AI 返回：", data);
 
-        // 尝试解析多种可能返回格式
         let reply = "";
 
-        // OpenAI 格式的新返回
-        if (data.output_text) reply = data.output_text;
-
-        // 某些代理：data.reply
-        else if (data.reply) reply = data.reply;
-
-        // Choices 风格：text
-        else if (data.choices && data.choices[0] && data.choices[0].text)
-            reply = data.choices[0].text;
-
-        // Choices 风格：message.content
-        else if (
-            data.choices && data.choices[0] &&
-            data.choices[0].message && data.choices[0].message.content
-        )
+        // 兼容各种返回格式 ↓↓↓
+        if (data.choices && data.choices[0]?.message?.content) {
             reply = data.choices[0].message.content;
-
-        // output 数组结构
-        else if (
-            data.output &&
-            data.output[0] &&
-            data.output[0].content &&
-            data.output[0].content[0] &&
-            data.output[0].content[0].text
-        )
-            reply = data.output[0].content[0].text;
-
-        // 其他未知格式 → 打印 JSON
-        else reply = JSON.stringify(data).slice(0, 1500);
+        }
+        else if (data.output_text) {
+            reply = data.output_text;
+        }
+        else if (data.reply) {
+            reply = data.reply;
+        }
+        else {
+            reply = JSON.stringify(data, null, 2);
+        }
 
         aiMsg.innerText = reply;
-    }
-    catch (err) {
-        aiMsg.innerText = "请求失败：" + err;
+
+    } catch (err) {
+        console.error("sendMsg error:", err);
+        aiMsg.innerText = "⚠ AI 调用失败，请检查 API 设置。";
     }
 
     chat.scrollTop = chat.scrollHeight;
 }
-
 </script>
 </body>
 </html>
