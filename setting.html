@@ -1,0 +1,66 @@
+<!-- settings.html -->
+<section id="settings-fragment" class="settings-frag">
+  <div class="settings-panel">
+    <h2>设置</h2>
+
+    <div class="setting-row">
+      <label>你的昵称：</label>
+      <input type="text" id="settingNick" placeholder="例如：小希">
+    </div>
+
+    <div class="setting-row">
+      <label>头像上传：</label>
+      <input type="file" id="avatarFile" accept="image/*">
+    </div>
+
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start">
+      <label>长期记忆 / 人设背景：</label>
+      <textarea id="longMemory" placeholder="例如：我是一个温柔的图书管理员..." style="height:96px"></textarea>
+    </div>
+
+    <div class="setting-row">
+      <label>主题：</label>
+      <select id="themeMode">
+        <option value="light">浅色</option>
+        <option value="dark">深色</option>
+      </select>
+      <label>主题色：</label>
+      <input type="color" id="themeColor" value="#2d85ff">
+    </div>
+
+    <hr>
+
+    <h3>API 调用设置</h3>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <label><input type="checkbox" id="useProxyCheckbox"> 使用后端代理（/api/chat）</label>
+      <span class="small">推荐：开启后前端不保存/发送 API Key</span>
+    </div>
+
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start">
+      <label>API URL</label>
+      <input type="text" id="apiUrlInput" placeholder="https://api521.pro/v1/chat">
+      <label>API KEY（注意安全）</label>
+      <input type="text" id="apiKeyInput" placeholder="API Key（前端存储风险）">
+      <label>模型</label>
+      <select id="apiModelSelect">
+        <option value="model-default">默认</option>
+        <option value="gpt-4">gpt-4</option>
+        <option value="gpt-4o">gpt-4o</option>
+        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+      <button id="saveApiSettings" class="secondary">保存设置</button>
+      <button id="testApiBtn" class="secondary">测试 API</button>
+      <div id="apiTestResult" class="small" style="margin-left:8px"></div>
+    </div>
+
+    <div style="margin-top:12px;color:#b04" class="small">警告：把长期有效 KEY 放前端会被公开。推荐后端代理。</div>
+
+    <div style="margin-top:18px">
+      <button id="saveSettings">保存全部设置</button>
+      <button id="resetAll" class="secondary">重置本地数据</button>
+    </div>
+  </div>
+</section>
