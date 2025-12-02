@@ -1,0 +1,79 @@
+<!-- chat.html (只是一段会被 index.html fetch 注入的 HTML) -->
+<section id="chat-fragment" class="phone-frag">
+
+  <div class="phone">
+    <div class="screen">
+      <div class="topbar">
+        <div>
+          <div class="title">AI 手机模拟器（分离版）</div>
+          <div class="tiny" id="subtitle">角色扮演 · 朋友圈</div>
+        </div>
+        <div class="tiny" id="clock"></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tabbtn active" data-tab="main" id="tab-main">主界面</div>
+        <div class="tabbtn" data-tab="settings" id="tab-settings">设置</div>
+      </div>
+
+      <div id="mainView" class="main">
+        <!-- Chat panel -->
+        <section class="chat-panel">
+          <div class="chat-header">
+            <img id="userAvatarHeader" class="avatar-small" src="" alt="avatar">
+            <div style="flex:1">
+              <div id="displayName">你</div>
+              <div class="small" id="displayPersona">人设</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+              <div class="small">上下文长度：
+                <input id="contextLen" type="number" min="1" max="30" value="6" style="width:56px;padding:4px;border-radius:6px;border:1px solid #e6e6e6">
+              </div>
+              <label class="small"><input id="useMemory" type="checkbox" checked> 携带记忆</label>
+            </div>
+          </div>
+
+          <div class="chat-list" id="chatList"></div>
+
+          <div class="rolebar">
+            <div style="display:flex;gap:8px;">
+              <select id="roleSelect">
+                <option value="assistant:gentle">温柔助理</option>
+                <option value="assistant:strict">冷静教练</option>
+                <option value="assistant:friend">好朋友</option>
+                <option value="assistant:custom">自定义</option>
+              </select>
+              <input type="text" id="customPersona" placeholder="自定义人设（选择自定义时生效）" style="display:none">
+            </div>
+
+            <textarea id="messageInput" placeholder="输入消息，按 Enter 发送"></textarea>
+            <div style="display:flex;gap:8px;">
+              <button id="sendBtn">发送</button>
+              <button class="secondary" id="mockApiBtn">模拟调用</button>
+              <button class="secondary" id="clearChat">清空聊天</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Moments panel -->
+        <aside class="moments">
+          <div class="composer">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <img id="userAvatarCompose" class="avatar-small" src="" alt="avatar">
+              <input type="text" id="nickInput" placeholder="说点什么" style="flex:1">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="fileInput" accept="image/*" multiple>
+              <label><input type="checkbox" id="cropSquare"> 裁剪为正方形</label>
+              <button id="postBtn">发朋友圈</button>
+              <button class="secondary" id="clearFeed">清空动态</button>
+            </div>
+            <div class="preview-row" id="previewRow"></div>
+          </div>
+
+          <div class="feed" id="feedList"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
