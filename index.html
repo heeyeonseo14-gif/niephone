@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI 手机模拟器（入口）</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="shell-header">
+      <h1>AI 手机模拟器</h1>
+      <nav>
+        <button data-load="chat.html" class="nav-btn active">主界面</button>
+        <button data-load="settings.html" class="nav-btn">设置</button>
+      </nav>
+    </header>
+
+    <main id="content" class="content">
+      <!-- 这里会动态注入 chat.html（或 settings.html） -->
+      <div class="loading">正在加载…</div>
+    </main>
+
+    <footer class="shell-footer">
+      <small>部署：把这些文件放在 GitHub 仓库根目录并启用 Pages 即可。</small>
+    </footer>
+  </div>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>
